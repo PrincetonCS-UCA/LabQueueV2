@@ -1,21 +1,21 @@
 # Directory Structure
 
-/api - all relevant server-side code for endpoint logic
-    /v1 - top-level files are endpoint definitions
-        /controllers - contains functions called at each endpoint
-        /middleware - contains route middleware (functions resolved before calling the main logic of the endpoint)
-        /repositories - contains functions that access database. Should probably be renamed.
-    v1.js - packages up the serverside code to be included in the app
-/app - contains other application code besides code for the api / endpoints
-    /client - a React mess. `index.jsx` is the main entry point
-    /server - other serverside code.
-        /views - views (using nunjucks) that are rendered server side.
+    /api - all relevant server-side code for endpoint logic
+        /v1 - top-level files are endpoint definitions
+            /controllers - contains functions called at each endpoint
+            /middleware - contains route middleware (functions resolved before calling the main logic of the endpoint)
+            /repositories - contains functions that access database. Should probably be renamed.
+        v1.js - packages up the serverside code to be included in the app
+    /app - contains other application code besides code for the api / endpoints
+        /client - a React mess. `index.jsx` is the main entry point
+        /server - other serverside code.
+            /views - views (using nunjucks) that are rendered server side.
 
-/config - contains application (serverside) configuration, including which view engines, passport setup, and database options
-/enums - contains enum definitions used by the rest of the app. JS doesn't support enums, so it's a bit hacky.
-/models - database models for Sequelize
-/public - static files
-/utils - one-off functions that are useful in various places
+    /config - contains application (serverside) configuration, including which view engines, passport setup, and database options
+    /enums - contains enum definitions used by the rest of the app. JS doesn't support enums, so it's a bit hacky.
+    /models - database models for Sequelize
+    /public - static files
+    /utils - one-off functions that are useful in various places
 
 Main entry point into app is at `index.js`. Please also take a look at `frontend.md` and `api.md` for some design notes.
 
