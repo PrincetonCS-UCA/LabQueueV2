@@ -1,3 +1,11 @@
+# THIS IS OUTDATED AND HAS NOT BEEN UPDATED PROPERLY.
+
+Please see `api.md` and `frontend.md` for better design notes!
+
+Repo -> Accessor or Modifier
+
+Policies will eventually also be backed by courses and rooms, so we will probably have to name them.
+
 * Authentication:
     - every time you open the app / browser, need to set up a session by going to /login before you have the user (even if cookies exist)
         - If CAS is still active, then going to /login automatically gives you the session
