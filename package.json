@@ -32,11 +32,14 @@
     "sequelize": "^3.24.1",
     "socket.io": "^1.4.8",
     "sqlite": "^2.2.0",
+    "superagent": "^3.5.2",
     "webpack": "^1.13.2"
   },
   "devDependencies": {
     "express-session": "^1.15.2",
     "mocha": "^3.3.0",
-    "should": "^11.2.1"
+    "really-need": "^1.9.2",
+    "should": "^11.2.1",
+    "supertest": "^3.0.0"
   }
 }

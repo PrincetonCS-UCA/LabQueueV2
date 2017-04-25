@@ -99,3 +99,5 @@ function start() {
             app.get('port'), app.get('env'));
     });
 }
+
+module.exports = app;
