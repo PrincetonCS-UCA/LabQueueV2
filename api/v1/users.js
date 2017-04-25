@@ -11,6 +11,6 @@ module.exports = function(app, models, prefix) {
 
     // programmatically create users (might be useful for importing or setting TAs)
     app.route(prefix + 'users')
-        .post(auth.casBlock(), Controller.createUser);
+        .post(auth.isAuthenticated(), Controller.createUser);
 
 }

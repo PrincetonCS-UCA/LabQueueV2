@@ -72,8 +72,7 @@ Living document of all the endpoints, and what they should return.
         userIds: [UserIdString],
         queueId: QueueIdString,
         role: RoleString,
-        courseIds [CourseIdString],
-
+        courseIds [CourseIdString]
     }
 
 ### Data Collection Endpoints
@@ -123,3 +122,29 @@ Requests can only be edited by authors, TAs of a queue, or the queue admin(s)
 */queue/:queue/requests/:request/complete* - completes a request
 
 */queue/:queue/policies/:policy* - edits details of a policy, including roles and users
+
+## Authentication
+
+* Check for WSSE key (to test API) first, and then if there is none provided, check CAS. 
+
+If going through terminal / whatever, we need to set up a WSSE header and submit that.
+
+Page Endpoints:
+    * check if wsse cookie is set
+        -if the wsse cookie doesn't work, unset it
+    * if not, redirect to CAS
+        - once authenticated, generate a key
+    * set cookie to key
+
+* WSSE is a username / password combo. Client applies WSSE to it and sends to server. Server has the correct username / password, and also applies WSSE to it to check if the two match.
+
+We store actual WSSE password in the server, not the encoded result!
+
+## Get photos
+
+Example: route /photo/dmliao
+    - authentication
+    - WSSE-GET tigerbook.../dmliao (secret WSSE key for Tigerbook, custom to the app)
+    - print(content-type=png)
+    - print(image-data)
+

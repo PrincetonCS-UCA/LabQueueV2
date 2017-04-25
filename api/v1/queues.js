@@ -10,29 +10,37 @@ module.exports = function(app, models, prefix) {
     /// ROUTES
     ///////////////////
 
-    app.get(prefix + 'queue/create', auth.casBlock(), Controller.postQueue);
+    app.get(prefix + 'queue/create', auth.isAuthenticated(), Controller.createQueue);
+
+    app.route(prefix + 'queue')
+        .post(auth.isAuthenticated(), Controller.createQueue);
 
     app.route(prefix + 'queue/:queue')
-        .get(auth.casBlock(), Controller.getQueueMeta);
+        .get(auth.isAuthenticated(), Controller.getQueueMeta)
+        .put(auth.isAuthenticated(), Controller.editQueueMeta);
+
+    app.route(prefix + 'queue/:queue/active')
+        .get(auth.isAuthenticated(), Controller.getQueueActive)
+        .post(auth.isAuthenticated(), Controller.createRequest);
+
+    app.route(prefix + 'queue/:queue/active/:username')
+        .get(auth.isAuthenticated(), Controller.getActiveRequestByUser);
+
+    app.route(prefix + 'queue/:queue/requests/:request')
+        .get(auth.isAuthenticated(), Controller.getSingleRequest)
+        .put(auth.isAuthenticated(), Controller.editSingleRequest);
 
     app.route(prefix + 'queue/:queue/requests')
-        .get(auth.casBlock(), Controller.getQueue)
-        .post(auth.casBlock(), Controller.createRequest);
-
-    // app.route(prefix + 'queue/:queue/requests/:request');
-    // get retrieves a single one
-    // put lets you update it
-    // delete lets you delete it
-
-    // put only - marks a request as complete.
-    // app.route(prefix + 'queue/:queue/requests/:request/complete');
+        .post(auth.isAuthenticated(), Controller.createRequest);
 
     // test routes
     app.route(prefix + 'queue/:queue/create')
-        .get(auth.casBlock(), Controller.createRequest);
+        .get(auth.isAuthenticated(), Controller.createRequest);
 
-    app.route(prefix + 'queue/:queue/requests/:username')
-        .get(auth.casBlock(), Controller.getSingleRequest);
-    app.route(prefix + 'queue/:queue/requests/:username/cancel')
-        .get(auth.casBlock(), Controller.cancelRequest);
+    app.route(prefix + 'queue/:queue/requests/:request/cancel')
+        .get(auth.isAuthenticated(), Controller.cancelRequest);
+    app.route(prefix + 'queue/:queue/requests/:request/claim')
+        .get(auth.isAuthenticated(), Controller.claimRequest);
+    app.route(prefix + 'queue/:queue/requests/:request/complete')
+        .get(auth.isAuthenticated(), Controller.completeRequest);
 }

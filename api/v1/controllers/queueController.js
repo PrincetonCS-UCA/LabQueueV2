@@ -13,7 +13,7 @@ module.exports = function(app, models) {
     /// AUTHORIZATION
     ///////////////////
 
-    function postQueue(req, res) {
+    function createQueue(req, res) {
 
         var q = {
             name: "Test Queue",
@@ -30,13 +30,13 @@ module.exports = function(app, models) {
             res.json(this.queue);
         }).catch(function(e) {
             console.log(e);
-            res.json({
+            res.status(400).json({
                 error: e
             });
         })
     }
 
-    function getQueue(req, res) {
+    function getQueueActive(req, res) {
 
         queueRepo.findCurrentRequestsInQueue(req.queue.id).then(function(
             requests) {
@@ -52,6 +52,10 @@ module.exports = function(app, models) {
 
     function getQueueMeta(req, res) {
         res.json(req.queue);
+    }
+
+    function editQueueMeta(req, res) {
+        res.send("Unimplemented");
     }
 
     function createRequest(req, res) {
@@ -80,6 +84,15 @@ module.exports = function(app, models) {
     }
 
     function getSingleRequest(req, res) {
+        // TODO
+        res.status(404, "Unimplemented");
+    }
+
+    function editSingleRequest(req, res) {
+        res.status(404, "Unimplemented");
+    }
+
+    function getActiveRequestByUser(req, res) {
 
         userRepo.findUserByCasId(req.params.username).then(function(author) {
 
@@ -98,6 +111,7 @@ module.exports = function(app, models) {
     }
 
     function cancelRequest(req, res) {
+        /*
         userRepo.findUserByCasId(req.params.username).then(function(author) {
 
             return queueRepo.changeRequestStatus(req.queue.id,
@@ -114,14 +128,30 @@ module.exports = function(app, models) {
                 error: e
             });
         })
+        */
+    }
+
+    function claimRequest(req, res) {
+        res.status(404, "Unimplemented");
+    }
+
+    function completeRequest(req, res) {
+        res.status(404, "Unimplemented");
     }
 
     return {
-        postQueue: postQueue,
-        getQueue: getQueue,
+        createQueue: createQueue,
+        getQueueActive: getQueueActive,
         getQueueMeta: getQueueMeta,
+        editQueueMeta: editQueueMeta,
+
         createRequest: createRequest,
         getSingleRequest: getSingleRequest,
-        cancelRequest: cancelRequest
+        editSingleRequest: editSingleRequest,
+
+        getActiveRequestByUser: getActiveRequestByUser,
+        cancelRequest: cancelRequest,
+        claimRequest: claimRequest,
+        completeRequest: completeRequest
     };
 }

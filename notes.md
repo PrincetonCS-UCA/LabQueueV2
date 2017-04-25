@@ -1,3 +1,10 @@
+## TODO:
+
+    Split policies into policies (top level) and rules
+    Each rule has a list of courses and rooms, and the policy is an OR combination of those rules.
+
+    Prototype WSSE server (just checks if WSSE key matches, and then redirects to CAS and generates new one if no match), return key and client code to store the key as a cookie
+
 # THIS IS OUTDATED AND HAS NOT BEEN UPDATED PROPERLY.
 
 Please see `api.md` and `frontend.md` for better design notes!
@@ -142,3 +149,9 @@ Policy // for TAs and other admins
                 remove: [String]
             }
         }
+
+# WSSE
+
+* API routes are only protected with WSSE (no CAS!)
+* Ok to store WSSE keys as plaintext in the database and on the client
+* STORE THE ACTUAL KEY AS A COOKIE, NOT THE WHOLE DIGEST

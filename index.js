@@ -71,7 +71,7 @@ require('./sockets')(socketOptions);
 
 //sync all sequelize models
 db.sequelize.sync({
-    force: true
+    force: false
 }).then(function() {
 
     // Test the connection to the database

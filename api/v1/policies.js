@@ -8,11 +8,13 @@ module.exports = function(app, models, prefix) {
     var Controller = require('./controllers/policyController')(app, models);
 
     // policies
-    app.route(prefix + 'queue/:queue/permissions')
-        .get(auth.casBlock(), Controller.getPolicies);
+    app.route(prefix + 'queue/:queue/policies')
+        .get(auth.isAuthenticated(), Controller.getPolicies);
 
-    app.route(prefix + 'queue/:queue/permissions/:role')
-        .get(auth.casBlock(), Controller.getOnePolicy);
+    app.route(prefix + 'queue/:queue/policies/:role')
+        .get(auth.isAuthenticated(), Controller.getOnePolicy);
     // permissions are uniquely ID'd by a combination of the queue and the role
 
+    app.route(prefix + 'queue/:queue/policies')
+        .post(auth.isAuthenticated(), Controller.createPolicy);
 }

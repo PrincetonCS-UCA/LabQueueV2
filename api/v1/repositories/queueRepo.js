@@ -46,6 +46,15 @@ module.exports = function(models) {
             })
     }
 
+    function findRequest(queueId, requestId) {
+        return models.Request.findOne({
+            where: {
+                queueId: queueId,
+                id: requestId
+            }
+        });
+    }
+
     // checks if there is already a request by this user in the queue
     // returns a Promise
     function findActiveRequestByAuthor(queueId, userId) {
@@ -75,8 +84,8 @@ module.exports = function(models) {
         });
     }
 
-    function changeRequestStatus(queueId, authorId, status, editorUserId) {
-        return findActiveRequestByAuthor(queueId, authorId).then(function(request) {
+    function changeRequestStatus(queueId, requestId, status, editorUserId) {
+        return findRequest(queueId, requestId).then(function(request) {
             if (!request) {
                 throw new RequestNotFoundError();
             }

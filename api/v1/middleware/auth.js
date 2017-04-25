@@ -1,6 +1,21 @@
 'use strict';
 
-var passport = require('passport');
+const passport = require('passport');
+const models = require('../../../models');
+const getProp = require('../../../utils/getProp');
+const wsse = require('../../../vendor/wsse');
+const authRepo = require('../repositories/authRepo')(models);
+const userRepo = require('../repositories/userRepo')(models);
+
+function verifyWSSERequest(req) {
+    var header = getProp(req.headers, "X-WSSE");
+    var re =
+        /UsernameToken +Username="(.+)", *PasswordDigest="(.+)", *Nonce="(.+)", *Created="(.+)"/g;
+
+    var match = re.exec(header);
+    return match;
+
+}
 
 /**
  * Login Required middleware.
@@ -39,5 +54,95 @@ exports.casBounce = function(options) {
             return res.redirect(url);
         }
         next();
+    }
+}
+
+// TODO: implement WSSE authentication, since we shouldn't use CAS for an API ._.
+exports.isAuthenticated = function(options) {
+    return function(req, res, next) {
+
+        if (getProp(req.headers, "Authorization") &&
+            getProp(req.headers, "Authorization") ==
+            'WSSE profile="UsernameToken"') {
+            var wsseString = getProp(req.headers, 'X-WSSE');
+            var verify = verifyWSSERequest(req);
+
+            if (!verify) {
+                // return cas.block(req, res, next);
+                return res.status(401).json({
+                    error: "Unauthorized"
+                });
+            }
+
+            var digest = verify[2];
+
+            var usernameSplit = verify[1].split('+');
+
+            var username = usernameSplit[0];
+            var service = "generic";
+            if (usernameSplit.length >= 2) {
+                service = usernameSplit[1];
+            }
+
+            console.log(service);
+            console.log(username);
+
+            // we assume nonce is in base64 form
+            var nonce64 = verify[3];
+            var nonce = Buffer.from(nonce64, 'base64').toString('utf-8');
+
+            var created = verify[4];
+
+            // TODO: reject if the timestamp is too old.
+
+            authRepo.getWSSEKey(username, service).then(function(key) {
+                if (!key) {
+                    return res.status(401).json({
+                        error: "Unauthorized"
+                    });
+                }
+
+                var password = key.key;
+
+                var token = new wsse.UsernameToken({
+                    username: username + "+" + service,
+                    password: password,
+                    created: created,
+                    nonce: nonce
+                });
+
+                if (digest === token.getPasswordDigest()) {
+                    // successful validation!
+                    console.log("VALIDATED");
+
+                    return userRepo.findUserByCasId(username).then(function(user) {
+                        if (!user) {
+                            res.status(401).json({
+                                error: "User doesn't exist"
+                            });
+                        }
+                        else {
+                            req.user = user;
+                            return next();
+                        }
+                    })
+
+                }
+
+                return res.status(401).json({
+                    error: "Unauthorized"
+                });
+            }).catch(function(error) {
+                return res.status(401).json({
+                    error: "Unauthorized"
+                });
+            })
+        }
+        else {
+            console.log("No WSSE Header");
+            return res.status(401).json({
+                error: "Unauthorized"
+            });
+        }
     }
 }

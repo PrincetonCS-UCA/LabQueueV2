@@ -32,8 +32,15 @@ module.exports = function(app, models) {
         })
     }
 
+    function createPolicy(req, res) {
+        // TODO
+        res.send("Unimplemented");
+    }
+
     return {
         getPolicies: getPolicies,
-        getOnePolicy: getOnePolicy
+        getOnePolicy: getOnePolicy,
+
+        createPolicy: createPolicy
     };
 }
