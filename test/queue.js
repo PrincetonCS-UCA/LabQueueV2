@@ -7,7 +7,7 @@ var wsse = require('../vendor/wsse');
 
 const db = require('../models');
 const username = 'dmliao';
-const service = 'webqueue';
+const service = 'test';
 const password = 'a2d7b49fbb9caed00add4027a9411a90f187e038b96c255a0a131a0b45d1ae9a';
 
 function createRequestOptions(endpoint, method) {
@@ -31,9 +31,38 @@ function createRequestOptions(endpoint, method) {
     return options;
 }
 
+function generateKey(done) {
+    db.sequelize.sync({
+        force: false
+    }).then(function() {
+        return db.WSSEKey.destroy({
+            where: {
+                username: username,
+                service: service
+            }
+        })
+    }).then(function() {
+        return db.WSSEKey.create({
+            username: username,
+            service: service,
+            key: password
+        })
+    }).then(function() {
+        done();
+    })
+}
+
+describe('Auth', function() {
+    before(function(done) {
+        this.timeout(5000);
+        generateKey(done);
+    })
+})
+
 describe('Queue', function() {
     before(function(done) {
         this.timeout(5000);
+        console.log("Make sure you set the WSSE key properly!");
         db.sequelize.sync({
             force: false
         }).then(function() {
@@ -47,7 +76,7 @@ describe('Queue', function() {
                 truncate: true
             });
         }).then(function() {
-            done();
+            generateKey(done);
         }).catch(function(error) {
             console.log(error);
         });
@@ -59,6 +88,8 @@ describe('Queue', function() {
                 'POST');
 
             request(opts, function(error, response, body) {
+                console.log(error);
+                console.log(response);
                 var res = JSON.parse(body);
                 console.log(response);
                 should.not.exist(error);
