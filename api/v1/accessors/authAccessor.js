@@ -29,8 +29,27 @@ module.exports = function(models) {
         })
     }
 
+    function saveNonce(nonce) {
+        return clearOldNonces().then(function() {
+            return models.WSSEEvent.create({
+                nonce: nonce
+            });
+        });
+    }
+
+    function clearOldNonces() {
+        return models.WSSEEvent.destroy({
+            where: {
+                createdAt: {
+                    $lt: new Date(new Date() - 24 * 60 * 60 * 1000)
+                }
+            }
+        });
+    }
+
     return {
         getWSSEKey: getWSSEKey,
-        generateWSSEKey: generateWSSEKey
+        generateWSSEKey: generateWSSEKey,
+        saveNonce: saveNonce
     };
 }

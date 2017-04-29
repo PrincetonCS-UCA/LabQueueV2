@@ -2,7 +2,7 @@
 
 module.exports = function(app, models) {
 
-    const authRepo = require('../repositories/authRepo')(models);
+    const authAccessor = require('../accessors/authAccessor')(models);
 
     function getWSSEKey(req, res) {
         var username = req.user.id;
@@ -10,7 +10,7 @@ module.exports = function(app, models) {
 
         console.log(service);
 
-        authRepo.generateWSSEKey(username, service).then(function(key) {
+        authAccessor.generateWSSEKey(username, service).then(function(key) {
             var password = key.key;
             res.send(password);
         }).catch(function(error) {

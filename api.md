@@ -69,17 +69,24 @@ Living document of all the endpoints, and what they should return.
 */queue/:queue/policies/:policy* - a single policy on the queue
     
     {
-        userIds: [UserIdString],
+        userIds: [{Users}],
         queueId: QueueIdString,
         role: RoleString,
-        courseIds [CourseIdString]
+        rules: [{Rules}]
     }
+*/queue/:queue/users/:user/permissions* - returns the policies for a user on the queue.
 
 ### Data Collection Endpoints
 
+TODO: figure out what to do about times. Should we require a querystring with times?
+
+*/queue/:queue/users/:user/requests* - all requests by this user, active or not
+*/queue/:queue/courses/:course/requests* - all requests for a course
+*/queue/:queue/rooms/:room/requests* - all requests by for a room
+
 ## POST
 
-*/queue* - create a queue
+*/queue* - create a queue, and makes a default policy with a single rule allowing all courses and rooms access.
 */queue/:queue/requests* - create a request in a queue, with the following fields:
 
     {
@@ -94,9 +101,12 @@ Status is automatically set as `inQueue`
     
     {
         role: String,
-        courseIds (optional): [String],
-        roomIds (optional): [String]
+        rules: [{
+            courseIds (optional): [String],
+            roomIds (optional): [String]
+        }]
     }
+
 
 ## PUT
 
@@ -148,3 +158,22 @@ Example: route /photo/dmliao
     - print(content-type=png)
     - print(image-data)
 
+## Other Logic
+
+### Check if a User has Permission for a specific Queue:
+
+* Retrieve the Policy for the Queue associated with the User
+* Parse the Rules for that Policy. For each rule:
+    * check if the Course and the Room in the Request is in that rule. 
+    * If so, return true
+    * If not, go to the next one
+* If we go through all the rules, return false
+
+### Making sure that each User is in only one Policy per Queue
+
+Is this necesssary?
+    
+https://github.com/sequelize/sequelize/issues/4880
+
+Policy Fields:
+    setUsers / addUsers - query for a policy with that user, the same queue, and same role. If it already exists, then remove that user from the other policy first.

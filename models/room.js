@@ -9,6 +9,9 @@ module.exports = function(sequelize, DataTypes) {
         Room.belongsToMany(models.Queue, {
           through: "QueueRooms"
         });
+        Room.belongsToMany(models.Rule, {
+          through: "RuleRooms"
+        });
       }
     }
   });

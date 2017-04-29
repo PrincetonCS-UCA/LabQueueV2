@@ -5,10 +5,10 @@ const policyTypes = require('../../../enums/policyTypes');
 
 module.exports = function(app, models) {
 
-    const policyRepo = require('../repositories/policyRepo')(models);
+    const policy = require('../accessors/policyAccessor')(models);
 
     function getPolicies(req, res) {
-        policyRepo.findAllPoliciesForQueue(req.queue.id).then(function(
+        policyAccessor.findAllPoliciesForQueue(req.queue.id).then(function(
             policies) {
             console.log(policies);
 
@@ -19,7 +19,7 @@ module.exports = function(app, models) {
     }
 
     function getOnePolicy(req, res, next) {
-        policyRepo.findPolicy(req.queue.id, req.params.role).then(function(
+        policyAccessor.findPolicy(req.queue.id, req.params.role).then(function(
             policy) {
             console.log(policy);
             if (!policy) {

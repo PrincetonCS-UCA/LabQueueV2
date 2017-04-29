@@ -4,8 +4,8 @@ const passport = require('passport');
 const models = require('../../../models');
 const getProp = require('../../../utils/getProp');
 const wsse = require('../../../vendor/wsse');
-const authRepo = require('../repositories/authRepo')(models);
-const userRepo = require('../repositories/userRepo')(models);
+const authAccessor = require('../accessors/authAccessor')(models);
+const userAccessor = require('../accessors/userAccessor')(models);
 
 function verifyWSSERequest(req) {
     var header = getProp(req.headers, "X-WSSE");
@@ -95,48 +95,56 @@ exports.isAuthenticated = function(options) {
 
             // TODO: reject if the timestamp is too old.
 
-            authRepo.getWSSEKey(username, service).then(function(key) {
-                if (!key) {
+            authAccessor.saveNonce(nonce).then(function() {
+                authAccessor.getWSSEKey(username, service).then(function(key) {
+                    if (!key) {
+                        return res.status(401).json({
+                            error: "Unauthorized"
+                        });
+                    }
+
+                    var password = key.key;
+
+                    var token = new wsse.UsernameToken({
+                        username: username + "+" + service,
+                        password: password,
+                        created: created,
+                        nonce: nonce
+                    });
+
+                    if (digest === token.getPasswordDigest()) {
+                        // successful validation!
+                        console.log("VALIDATED");
+
+                        return userAccessor.findUserByCasId(username).then(
+                            function(user) {
+                                if (!user) {
+                                    res.status(401).json({
+                                        error: "User doesn't exist"
+                                    });
+                                }
+                                else {
+                                    req.user = user;
+                                    return next();
+                                }
+                            })
+
+                    }
+
                     return res.status(401).json({
                         error: "Unauthorized"
                     });
-                }
-
-                var password = key.key;
-
-                var token = new wsse.UsernameToken({
-                    username: username + "+" + service,
-                    password: password,
-                    created: created,
-                    nonce: nonce
-                });
-
-                if (digest === token.getPasswordDigest()) {
-                    // successful validation!
-                    console.log("VALIDATED");
-
-                    return userRepo.findUserByCasId(username).then(function(user) {
-                        if (!user) {
-                            res.status(401).json({
-                                error: "User doesn't exist"
-                            });
-                        }
-                        else {
-                            req.user = user;
-                            return next();
-                        }
-                    })
-
-                }
-
-                return res.status(401).json({
-                    error: "Unauthorized"
-                });
+                }).catch(function(error) {
+                    return res.status(401).json({
+                        error: "Unauthorized"
+                    });
+                })
             }).catch(function(error) {
                 return res.status(401).json({
-                    error: "Unauthorized"
+                    error: "Reused Nonce"
                 });
-            })
+            });
+
         }
         else {
             console.log("No WSSE Header");

@@ -6,9 +6,9 @@ const associations = require('../../../enums/associations');
 
 module.exports = function(app, models) {
 
-    const queueRepo = require('../repositories/queueRepo')(models);
-    const policyRepo = require('../repositories/policyRepo')(models);
-    const userRepo = require('../repositories/userRepo')(models);
+    const queueAccessor = require('../accessors/queueAccessor')(models);
+    const policyAccessor = require('../accessors/policyAccessor')(models);
+    const userAccessor = require('../accessors/userAccessor')(models);
 
     /// AUTHORIZATION
     ///////////////////
@@ -20,10 +20,10 @@ module.exports = function(app, models) {
             description: "Description for test queue"
         };
 
-        queueRepo.createQueue(q, req.user.id).bind({}).then(function(queue) {
+        queueAccessor.createQueue(q, req.user.id).bind({}).then(function(queue) {
             console.log(queue);
             this.queue = queue;
-            return policyRepo.changePolicyMembers(queue.id,
+            return policyAccessor.changePolicyMembers(queue.id,
                 policyTypes.ta, [req.user.id], associations.add);
         }).then(function(result) {
             console.log(result);
@@ -38,7 +38,7 @@ module.exports = function(app, models) {
 
     function getQueueActive(req, res) {
 
-        queueRepo.findCurrentRequestsInQueue(req.queue.id).then(function(
+        queueAccessor.findCurrentRequestsInQueue(req.queue.id).then(function(
             requests) {
             res.json(requests);
         }).catch(function(e) {
@@ -64,11 +64,11 @@ module.exports = function(app, models) {
             message: "This is a request"
         };
         // post a request
-        queueRepo.createRequest(r, req.queue.id, req.user.id).then(function(
+        queueAccessor.createRequest(r, req.queue.id, req.user.id).then(function(
                 request) {
                 res.json(request);
             })
-            .catch(queueRepo.RequestAlreadyExistsError, function(e) {
+            .catch(queueAccessor.RequestAlreadyExistsError, function(e) {
                 res.status(403).json({
                     error: 'User cannot post more than one request at a time'
                 });
@@ -94,9 +94,9 @@ module.exports = function(app, models) {
 
     function getActiveRequestByUser(req, res) {
 
-        userRepo.findUserByCasId(req.params.username).then(function(author) {
+        userAccessor.findUserByCasId(req.params.username).then(function(author) {
 
-            return queueRepo.findActiveRequestByAuthor(req.queue.id, author.id)
+            return queueAccessor.findActiveRequestByAuthor(req.queue.id, author.id)
 
         }).then(function(request) {
             res.json(request);
@@ -112,9 +112,9 @@ module.exports = function(app, models) {
 
     function cancelRequest(req, res) {
         /*
-        userRepo.findUserByCasId(req.params.username).then(function(author) {
+        userAccessor.findUserByCasId(req.params.username).then(function(author) {
 
-            return queueRepo.changeRequestStatus(req.queue.id,
+            return queueAccessor.changeRequestStatus(req.queue.id,
                 author.id, requestStatuses.canceled, req.user.id);
 
         }).then(function(request) {
