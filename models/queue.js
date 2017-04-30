@@ -29,11 +29,11 @@ module.exports = function(sequelize, DataTypes) {
           as: "owner"
         });
         Queue.belongsToMany(models.Course, {
-          through: "QueueCourses",
+          through: "queueCourses",
           foreignKey: 'queueId'
         });
         Queue.belongsToMany(models.Room, {
-          through: "QueueRooms",
+          through: "queueRooms",
           foreignKey: 'queueId'
         });
       }

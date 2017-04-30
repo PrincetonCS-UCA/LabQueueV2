@@ -148,7 +148,7 @@ describe('Loading Express', function() {
                         console.log(res);
                         should.not.exist(
                             error);
-                        assert.equal(res.Courses.length, 1);
+                        assert.equal(res.courses.length, 1);
                         done();
                     });
                 })
@@ -176,7 +176,7 @@ describe('Loading Express', function() {
                         console.log(res);
                         should.not.exist(
                             error);
-                        assert.equal(res.Courses.length, 3);
+                        assert.equal(res.courses.length, 3);
                         db.Course.count().then(function(c) {
                             assert.equal(c, 3);
                             done();

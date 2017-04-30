@@ -12,7 +12,8 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         Room.belongsToMany(models.Queue, {
-          through: "QueueRooms"
+          through: "queueRooms",
+          foreignKey: "roomId"
         });
 
       }

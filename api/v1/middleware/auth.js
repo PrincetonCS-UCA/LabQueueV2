@@ -58,7 +58,6 @@ exports.casBounce = function(options) {
 
 // TODO: implement WSSE authentication, since we shouldn't use CAS for an API ._.
 exports.isAuthenticated = function(options) {
-    return exports.casBounce();
     return function(req, res, next) {
 
         if (getProp(req.headers, "Authorization") &&
