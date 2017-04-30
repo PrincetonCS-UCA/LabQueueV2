@@ -13,7 +13,20 @@ module.exports = function(app, models) {
         models.Queue.findOne({
             where: {
                 id: id
-            }
+            },
+            include: [{
+                model: models.Course,
+                attributes: ['id'],
+                through: {
+                    attributes: []
+                }
+            }, {
+                model: models.Room,
+                attributes: ['id'],
+                through: {
+                    attributes: []
+                }
+            }, ]
         }).then(function(queue) {
             if (!queue) {
                 return next('route');

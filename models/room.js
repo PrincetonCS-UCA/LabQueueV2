@@ -2,6 +2,11 @@
 
 module.exports = function(sequelize, DataTypes) {
   var Room = sequelize.define("Room", {
+    id: {
+      type: DataTypes.STRING,
+      unique: true,
+      primaryKey: true
+    },
     name: DataTypes.STRING
   }, {
     classMethods: {
@@ -9,9 +14,7 @@ module.exports = function(sequelize, DataTypes) {
         Room.belongsToMany(models.Queue, {
           through: "QueueRooms"
         });
-        Room.belongsToMany(models.Rule, {
-          through: "RuleRooms"
-        });
+
       }
     }
   });

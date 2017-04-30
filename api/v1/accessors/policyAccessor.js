@@ -1,16 +1,56 @@
 'use strict';
 
+const Validator = require('jsonschema').Validator;
+var v = new Validator();
+
 const requestStatuses = require('../../../enums/requestStatuses');
 const policyTypes = require('../../../enums/policyTypes');
 const associations = require('../../../enums/associations');
 
 module.exports = function(models) {
 
+    // RULES
+    ///////////
+
+    var ruleSchema = {
+        'type': 'object',
+        'properties': {
+            'courses': {
+                'type': ['string', 'array'],
+                'items': {
+                    'type': 'string'
+                }
+            },
+            'rooms': {
+                'type': ['string', 'array'],
+                'items': {
+                    'type': 'string'
+                }
+            }
+        }
+    }
+
     // ERRORS
     //////////
     var OperationNotSupportedError = function() {
         Error.apply(this, arguments);
     };
+
+    // UTILS
+    /////////
+
+    function fitsRule(criteria, rule) {
+        // check if the criteria (a rule) fits into the rule
+
+    }
+
+    function createPolicy(queueId, role, rules) {
+
+    }
+
+    function findPoliciesThatFitRules(queueId, rules) {
+
+    }
 
     function findPolicy(queueId, role) {
         return models.Policy.findOne({
@@ -20,11 +60,13 @@ module.exports = function(models) {
             },
             include: [{
                 model: models.User,
+                attributes: ['id', 'name'],
                 through: {
-                    attributes: ['casId', 'name']
+                    attributes: []
                 }
             }]
         });
+
     }
 
     function findAllPoliciesForQueue(queueId) {
@@ -34,8 +76,9 @@ module.exports = function(models) {
             },
             include: [{
                 model: models.User,
+                attributes: ['id', 'name'],
                 through: {
-                    attributes: ['casId', 'name']
+                    attributes: []
                 }
             }]
         });

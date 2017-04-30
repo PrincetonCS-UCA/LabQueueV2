@@ -43,7 +43,9 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({
+    strict: false
+}));
 passportConf(app);
 
 //This is the options object that will be passed to the api files

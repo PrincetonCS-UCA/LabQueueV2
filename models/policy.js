@@ -3,7 +3,11 @@
 // as roles or permissions. Should we name it that, then?
 module.exports = function(sequelize, DataTypes) {
   var Policy = sequelize.define("Policy", {
-    role: DataTypes.STRING // as an enum?
+    role: DataTypes.STRING, // as an enum?
+    rules: {
+      type: DataTypes.STRING, // as JSON
+      defaultValue: "[]"
+    }
   }, {
     classMethods: {
       associate: function(models) {
@@ -11,7 +15,8 @@ module.exports = function(sequelize, DataTypes) {
           as: "queue"
         });
         Policy.belongsToMany(models.User, {
-          through: 'UserPolicies'
+          through: models.UserPolicy,
+          foreignKey: 'policyId'
         });
       }
     }

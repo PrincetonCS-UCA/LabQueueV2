@@ -11,17 +11,18 @@ function setCourseId(name, term) {
 
 module.exports = function(sequelize, DataTypes) {
   var Course = sequelize.define("Course", {
-    name: DataTypes.STRING,
-    term: DataTypes.STRING
+    id: {
+      type: DataTypes.STRING,
+      unique: true,
+      primaryKey: true
+    }
   }, {
     classMethods: {
       associate: function(models) {
         Course.belongsToMany(models.Queue, {
           through: "QueueCourses"
         });
-        Course.belongsToMany(models.Rule, {
-          through: "RuleCourses"
-        });
+
       }
     }
   });

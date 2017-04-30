@@ -5,7 +5,7 @@ const policyTypes = require('../../../enums/policyTypes');
 
 module.exports = function(app, models) {
 
-    const policy = require('../accessors/policyAccessor')(models);
+    const policyAccessor = require('../accessors/policyAccessor')(models);
 
     function getPolicies(req, res) {
         policyAccessor.findAllPoliciesForQueue(req.queue.id).then(function(

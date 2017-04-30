@@ -107,8 +107,7 @@ describe('Loading Express', function() {
                 });
             });
 
-            it(
-                'should not create queues with the same name',
+            it('should not create queues with the same name',
                 function(done) {
                     var requestUtils = RequestUtils(username, password,
                         service);
@@ -127,6 +126,35 @@ describe('Loading Express', function() {
                         done();
                     });
                 });
+
+            it('should automatically create a course for the queue', function(done) {
+
+                db.Queue.destroy({
+                    truncate: true
+                }).then(function() {
+                    var requestUtils = RequestUtils(username, password,
+                        service);
+                    var req = requestUtils.createRequest(server,
+                        '/api/v1/queue',
+                        'POST', {
+                            name: "Test Queue With Course",
+                            description: "",
+                            courses: ['COS126']
+                        });
+
+                    req.end(function(error,
+                        response) {
+                        var res = response.body;
+                        console.log(res);
+                        should.not.exist(
+                            error);
+                        assert.equal(res.Courses.length, 1);
+                        assert
+                        done();
+                    });
+                })
+
+            })
         });
     });
 })

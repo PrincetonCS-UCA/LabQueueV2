@@ -22,7 +22,8 @@ module.exports = function(sequelize, DataTypes) {
     classMethods: {
       associate: function(models) {
         User.belongsToMany(models.Policy, {
-          through: 'UserPolicies'
+          through: models.UserPolicy,
+          foreignKey: 'userId'
         });
       }
     }

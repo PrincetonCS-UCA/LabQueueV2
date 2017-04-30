@@ -5,16 +5,14 @@ var policyTypes = require('../../enums/policyTypes');
 
 module.exports = function(app, models, prefix) {
 
-    var Controller = require('./controllers/policyController')(app, models);
+	var Controller = require('./controllers/policyController')(app, models);
 
-    // policies
-    app.route(prefix + 'queue/:queue/policies')
-        .get(auth.isAuthenticated(), Controller.getPolicies);
+	// policies
+	app.route(prefix + 'queue/:queue/policies')
+		.get(auth.isAuthenticated(), Controller.getPolicies)
+		.post(auth.isAuthenticated(), Controller.createPolicy);
 
-    app.route(prefix + 'queue/:queue/policies/:role')
-        .get(auth.isAuthenticated(), Controller.getOnePolicy);
-    // permissions are uniquely ID'd by a combination of the queue and the role
-
-    app.route(prefix + 'queue/:queue/policies')
-        .post(auth.isAuthenticated(), Controller.createPolicy);
+	app.route(prefix + 'queue/:queue/policies/:role')
+		.get(auth.isAuthenticated(), Controller.getOnePolicy);
+	// permissions are uniquely ID'd by a combination of the queue and the role
 }
