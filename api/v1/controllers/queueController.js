@@ -15,21 +15,30 @@ module.exports = function(app, models) {
 
     function createQueue(req, res) {
 
+        if (!req.body.name) {
+            return res.status(400).json({
+                error: "A queue cannot have no name."
+            })
+        }
+
+        if (!req.body.description) {
+            req.body.description = "";
+        }
+
         var q = {
-            name: "Test Queue",
-            description: "Description for test queue"
+            name: req.body.name,
+            description: req.body.description
         };
 
-        queueAccessor.createQueue(q, req.user.id).bind({}).then(function(queue) {
-            console.log(queue);
+        queueAccessor.createQueue(q, req.user.id).bind({}).then(function(
+            queue) {
             this.queue = queue;
             return policyAccessor.changePolicyMembers(queue.id,
-                policyTypes.ta, [req.user.id], associations.add);
+                policyTypes.ta, [req.user.id], associations.add
+            );
         }).then(function(result) {
-            console.log(result);
             res.json(this.queue);
         }).catch(function(e) {
-            console.log(e);
             res.status(400).json({
                 error: e
             });
@@ -38,11 +47,11 @@ module.exports = function(app, models) {
 
     function getQueueActive(req, res) {
 
-        queueAccessor.findCurrentRequestsInQueue(req.queue.id).then(function(
-            requests) {
-            res.json(requests);
-        }).catch(function(e) {
-            console.log(e);
+        queueAccessor.findCurrentRequestsInQueue(req.queue.id).then(
+            function(
+                requests) {
+                res.json(requests);
+            }).catch(function(e) {
             // Send better user error logs.
             res.json({
                 error: e
@@ -64,10 +73,11 @@ module.exports = function(app, models) {
             message: "This is a request"
         };
         // post a request
-        queueAccessor.createRequest(r, req.queue.id, req.user.id).then(function(
-                request) {
-                res.json(request);
-            })
+        queueAccessor.createRequest(r, req.queue.id, req.user.id).then(
+                function(
+                    request) {
+                    res.json(request);
+                })
             .catch(queueAccessor.RequestAlreadyExistsError, function(e) {
                 res.status(403).json({
                     error: 'User cannot post more than one request at a time'
@@ -94,9 +104,11 @@ module.exports = function(app, models) {
 
     function getActiveRequestByUser(req, res) {
 
-        userAccessor.findUserByCasId(req.params.username).then(function(author) {
+        userAccessor.findUserByCasId(req.params.username).then(function(
+            author) {
 
-            return queueAccessor.findActiveRequestByAuthor(req.queue.id, author.id)
+            return queueAccessor.findActiveRequestByAuthor(req.queue
+                .id, author.id)
 
         }).then(function(request) {
             res.json(request);

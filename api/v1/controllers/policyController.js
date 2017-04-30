@@ -10,8 +10,6 @@ module.exports = function(app, models) {
     function getPolicies(req, res) {
         policyAccessor.findAllPoliciesForQueue(req.queue.id).then(function(
             policies) {
-            console.log(policies);
-
             res.json(policies);
         }).catch(function(e) {
             res.json(e);
@@ -21,7 +19,6 @@ module.exports = function(app, models) {
     function getOnePolicy(req, res, next) {
         policyAccessor.findPolicy(req.queue.id, req.params.role).then(function(
             policy) {
-            console.log(policy);
             if (!policy) {
                 return next('route');
             }

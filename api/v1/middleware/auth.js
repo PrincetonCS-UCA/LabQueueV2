@@ -46,7 +46,6 @@ exports.casBounce = function(options) {
     var setReturnTo = (options.setReturnTo === undefined) ? true : options.setReturnTo;
 
     return function(req, res, next) {
-        console.log(req.user);
         if (!req.isAuthenticated || !req.isAuthenticated()) {
             if (setReturnTo && req.session) {
                 req.session.returnTo = req.originalUrl || req.url;
@@ -84,9 +83,6 @@ exports.isAuthenticated = function(options) {
                 service = usernameSplit[1];
             }
 
-            console.log(service);
-            console.log(username);
-
             // we assume nonce is in base64 form
             var nonce64 = verify[3];
             var nonce = Buffer.from(nonce64, 'base64').toString('utf-8');
@@ -114,8 +110,6 @@ exports.isAuthenticated = function(options) {
 
                     if (digest === token.getPasswordDigest()) {
                         // successful validation!
-                        console.log("VALIDATED");
-
                         return userAccessor.findUserByCasId(username).then(
                             function(user) {
                                 if (!user) {
@@ -147,9 +141,8 @@ exports.isAuthenticated = function(options) {
 
         }
         else {
-            console.log("No WSSE Header");
             return res.status(401).json({
-                error: "Unauthorized"
+                error: "No WSSE header found. Unauthorized"
             });
         }
     }

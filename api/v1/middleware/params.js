@@ -12,7 +12,7 @@ module.exports = function(app, models) {
         }
         models.Queue.findOne({
             where: {
-                slug: id
+                id: id
             }
         }).then(function(queue) {
             if (!queue) {

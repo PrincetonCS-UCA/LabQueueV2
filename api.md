@@ -171,7 +171,7 @@ Example: route /photo/dmliao
 
 ### Making sure that each User is in only one Policy per Queue
 
-Is this necesssary?
+Is this necessary?
     
 https://github.com/sequelize/sequelize/issues/4880
 

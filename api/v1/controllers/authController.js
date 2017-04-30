@@ -8,8 +8,6 @@ module.exports = function(app, models) {
         var username = req.user.id;
         var service = req.params.service;
 
-        console.log(service);
-
         authAccessor.generateWSSEKey(username, service).then(function(key) {
             var password = key.key;
             res.send(password);

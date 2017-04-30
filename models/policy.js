@@ -7,7 +7,9 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        Policy.belongsTo(models.Queue);
+        Policy.belongsTo(models.Queue, {
+          as: "queue"
+        });
         Policy.belongsToMany(models.User, {
           through: 'UserPolicies'
         });

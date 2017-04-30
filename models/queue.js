@@ -13,13 +13,14 @@ module.exports = function(sequelize, DataTypes) {
         this.setDataValue('name', val);
 
         val = val.toLowerCase().trim();
-        this.setDataValue('slug', convertToSlug(val));
+        this.setDataValue('id', convertToSlug(val));
       }
     },
     description: DataTypes.STRING,
-    slug: {
+    id: {
       type: DataTypes.STRING,
-      unique: true
+      unique: true,
+      primaryKey: true
     }
   }, {
     classMethods: {

@@ -4,16 +4,16 @@ var config = require('../config/config.js');
 
 var apiPrefix = config.apiPrefix;
 
-exports.getQueue = function(queueSlug) {
-    var route = apiPrefix + 'queue/' + queueSlug + '/current';
+exports.getQueue = function(queueId) {
+    var route = apiPrefix + 'queue/' + queueId + '/current';
     return $.ajax({
         url: route,
         type: 'GET'
     });
 }
 
-exports.getQueueMeta = function(queueSlug) {
-    var route = apiPrefix + 'queue/' + queueSlug;
+exports.getQueueMeta = function(queueId) {
+    var route = apiPrefix + 'queue/' + queueId;
     return $.ajax({
         url: route,
         type: 'GET'
