@@ -3,7 +3,7 @@
 var convertToSlug = require('../utils/convertSlug');
 
 module.exports = function(sequelize, DataTypes) {
-  var Queue = sequelize.define("Queue", {
+  var Queue = sequelize.define("queue", {
     name: {
       type: DataTypes.STRING,
       unique: true,

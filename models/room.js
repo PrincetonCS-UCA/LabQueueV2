@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports = function(sequelize, DataTypes) {
-  var Room = sequelize.define("Room", {
+  var Room = sequelize.define("room", {
     id: {
       type: DataTypes.STRING,
       unique: true,

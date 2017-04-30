@@ -4,30 +4,15 @@ module.exports = function(app, models) {
     /// PARAMS
     ///////////
 
+    const queueAccessor = require('../accessors/queueAccessor')(models);
+
     var queueParam = function(req, res, next, id) {
         if (!id.match(/^[a-z0-9](-?[a-z0-9]+)*$/i)) {
             console.log("Does not match");
             // Yes, it's a valid ObjectId, proceed with `findById` call.
             return next('route');
         }
-        models.Queue.findOne({
-            where: {
-                id: id
-            },
-            include: [{
-                model: models.Course,
-                attributes: ['id'],
-                through: {
-                    attributes: []
-                }
-            }, {
-                model: models.Room,
-                attributes: ['id'],
-                through: {
-                    attributes: []
-                }
-            }, ]
-        }).then(function(queue) {
+        queueAccessor.findQueue(id).then(function(queue) {
             if (!queue) {
                 return next('route');
             }

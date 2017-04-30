@@ -6,43 +6,13 @@ const associations = require('../../../enums/associations');
 
 const Promise = require('bluebird');
 
-const Validator = require('jsonschema').Validator;
-var v = new Validator();
+const stringifyError = require('../../../utils/stringifyError');
 
 module.exports = function(app, models) {
 
     const queueAccessor = require('../accessors/queueAccessor')(models);
     const policyAccessor = require('../accessors/policyAccessor')(models);
     const userAccessor = require('../accessors/userAccessor')(models);
-    const courseAccessor = require('../accessors/courseAccessor')(models);
-
-    // VALIDATION
-    ///////////////////
-
-    var queueObjSchema = {
-        type: 'object',
-        properties: {
-            name: {
-                type: 'string'
-            },
-            description: {
-                type: 'string'
-            },
-            courses: {
-                type: 'array',
-                'items': {
-                    'type': 'string'
-                }
-            },
-            rooms: {
-                type: 'array',
-                'items': {
-                    'type': 'string'
-                }
-            }
-        },
-        required: ['name']
-    };
 
     /// AUTHORIZATION
     ///////////////////
@@ -72,51 +42,29 @@ module.exports = function(app, models) {
 
         var q = {
             name: req.body.name,
-            description: req.body.description
+            description: req.body.description,
+            courses: courses,
+            rooms: rooms
         };
 
-        console.log(courses);
-
-        var coursePromises = [];
-        for (var i = 0; i < courses.length; i++) {
-            coursePromises.push(courseAccessor.createOrFindCourse(courses[i]));
-        }
-
-        Promise.all(coursePromises).then(function(courseIds) {
-            queueAccessor.createQueue(q, req.user.id).bind({}).then(function(
-                queue) {
-                this.queue = queue;
-                return policyAccessor.changePolicyMembers(queue.id,
-                    policyTypes.ta, [req.user.id], associations.add
-                );
-            }).then(function(result) {
-                return this.queue.setCourses(courseIds);
-
-            }).then(function() {
-                res.json(this.queue);
-            }).catch(function(e) {
-                res.status(400).json({
-                    error: e
-                });
-            })
+        queueAccessor.createQueue(q, req.user.id).then(function(queue) {
+            return res.json(queue);
         }).catch(function(e) {
             res.status(400).json({
-                error: e
+                error: stringifyError(e)
             });
-        })
-
+        });;
     }
 
     function getQueueActive(req, res) {
 
-        queueAccessor.findCurrentRequestsInQueue(req.queue.id).then(
-            function(
-                requests) {
-                res.json(requests);
-            }).catch(function(e) {
+        queueAccessor.findCurrentRequestsInQueue(req.queue.id).then(function(
+            requests) {
+            res.json(requests);
+        }).catch(function(e) {
             // Send better user error logs.
             res.json({
-                error: e
+                error: stringifyError(e)
             });
         });
     }
@@ -149,7 +97,7 @@ module.exports = function(app, models) {
                 console.log(e);
                 // Send better user error logs.
                 res.json({
-                    error: e
+                    error: stringifyError(e)
                 });
             });
 
@@ -178,7 +126,7 @@ module.exports = function(app, models) {
             console.log(e);
             // Send better user error logs.
             res.json({
-                error: e.toJSON()
+                error: stringifyError(e)
             });
         });
 

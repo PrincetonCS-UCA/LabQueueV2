@@ -3,9 +3,13 @@
 const Validator = require('jsonschema').Validator;
 var v = new Validator();
 
+const Promise = require('bluebird');
+
 const requestStatuses = require('../../../enums/requestStatuses');
 const policyTypes = require('../../../enums/policyTypes');
 const associations = require('../../../enums/associations');
+
+const getArraysOfIds = require('../../../utils/getArraysOfIds');
 
 module.exports = function(models) {
 

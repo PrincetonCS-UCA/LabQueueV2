@@ -3,7 +3,7 @@
 const requestStatuses = require('../enums/requestStatuses');
 
 module.exports = function(sequelize, DataTypes) {
-  var Request = sequelize.define("Request", {
+  var Request = sequelize.define("request", {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,

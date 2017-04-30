@@ -149,8 +149,38 @@ describe('Loading Express', function() {
                         should.not.exist(
                             error);
                         assert.equal(res.Courses.length, 1);
-                        assert
                         done();
+                    });
+                })
+
+            })
+
+            it('should allow multiple and existing courses for queue', function(done) {
+
+                db.Queue.destroy({
+                    truncate: true
+                }).then(function() {
+                    var requestUtils = RequestUtils(username, password,
+                        service);
+                    var req = requestUtils.createRequest(server,
+                        '/api/v1/queue',
+                        'POST', {
+                            name: "Test Queue With Course 2",
+                            description: "",
+                            courses: ['COS126', 'COS226', 'COS217']
+                        });
+
+                    req.end(function(error,
+                        response) {
+                        var res = response.body;
+                        console.log(res);
+                        should.not.exist(
+                            error);
+                        assert.equal(res.Courses.length, 3);
+                        db.Course.count().then(function(c) {
+                            assert.equal(c, 3);
+                            done();
+                        })
                     });
                 })
 

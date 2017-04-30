@@ -14,6 +14,10 @@ else {
 }
 var db = {};
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 fs
   .readdirSync(__dirname)
   .filter(function(file) {
@@ -21,7 +25,7 @@ fs
   })
   .forEach(function(file) {
     var model = sequelize.import(path.join(__dirname, file));
-    db[model.name] = model;
+    db[capitalizeFirstLetter(model.name)] = model;
   });
 
 Object.keys(db).forEach(function(modelName) {
