@@ -1,9 +1,10 @@
 'use strict';
 
-var auth = require('./middleware/auth');
 var policyTypes = require('../../enums/policyTypes');
 
 module.exports = function(app, models, prefix) {
+
+    var auth = require('./middleware/auth')(app, models);
 
     var Controller = require('./controllers/queueController')(app, models);
 

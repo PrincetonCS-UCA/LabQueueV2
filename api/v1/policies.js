@@ -1,18 +1,19 @@
 'use strict';
 
-var auth = require('./middleware/auth');
 var policyTypes = require('../../enums/policyTypes');
 
 module.exports = function(app, models, prefix) {
 
-	var Controller = require('./controllers/policyController')(app, models);
+    var auth = require('./middleware/auth')(app, models);
 
-	// policies
-	app.route(prefix + 'queue/:queue/policies')
-		.get(auth.isAuthenticated(), Controller.getPolicies)
-		.post(auth.isAuthenticated(), Controller.createPolicy);
+    var Controller = require('./controllers/policyController')(app, models);
 
-	app.route(prefix + 'queue/:queue/policies/:role')
-		.get(auth.isAuthenticated(), Controller.getOnePolicy);
-	// permissions are uniquely ID'd by a combination of the queue and the role
+    // policies
+    app.route(prefix + 'queue/:queue/policies')
+        .get(auth.isAuthenticated(), Controller.getPolicies)
+        .post(auth.isAuthenticated(), Controller.createPolicy);
+
+    app.route(prefix + 'queue/:queue/policies/:role')
+        .get(auth.isAuthenticated(), Controller.getOnePolicy);
+    // permissions are uniquely ID'd by a combination of the queue and the role
 }

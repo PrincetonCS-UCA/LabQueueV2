@@ -9,8 +9,6 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
-var auth = require('./api/v1/middleware/auth');
-
 var path = require('path');
 // var favicon = require('serve-favicon');
 
@@ -21,7 +19,10 @@ var passportConf = require('./config/passport');
 
 const db = require('./models');
 
+var auth = require('./api/v1/middleware/auth')(app, db);
+
 app.set('port', process.env.PORT || 3000);
+app.set('models', db);
 
 // view engine setup
 viewConf(app);
