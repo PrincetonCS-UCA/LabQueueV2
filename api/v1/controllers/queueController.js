@@ -63,7 +63,7 @@ module.exports = function(app, models) {
             res.json(requests);
         }).catch(function(e) {
             // Send better user error logs.
-            res.json({
+            res.status(400).json({
                 error: stringifyError(e)
             });
         });

@@ -1,5 +1,7 @@
 'use strict';
 
+const errors = require('feathers-errors');
+
 module.exports = function(app, models) {
 
     const authAccessor = require('../accessors/authAccessor')(models);
@@ -12,7 +14,7 @@ module.exports = function(app, models) {
             var password = key.key;
             res.send(password);
         }).catch(function(error) {
-            res.status(400, error);
+            throw new errors.BadRequest(error);
         });
 
     }

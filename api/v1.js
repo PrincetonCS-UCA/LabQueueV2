@@ -2,6 +2,7 @@
 const walk = require('../utils/walk');
 const setupParams = require('./v1/middleware/params');
 
+const errors = require('feathers-errors');
 const prefix = '/api/v1/';
 
 module.exports = function(options) {
@@ -24,9 +25,7 @@ module.exports = function(options) {
 
   // Assume 404 since no middleware responded
   app.use(prefix, function(req, res) {
-    res.status(404).json({
-      error: 'Not found'
-    });
+    throw new errors.NotFound();
   });
 
 };

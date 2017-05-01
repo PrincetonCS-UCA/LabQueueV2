@@ -3,6 +3,8 @@
 const passport = require('passport');
 const getProp = require('../../../utils/getProp');
 
+const errors = require('feathers-errors');
+
 module.exports = function(app, models) {
 
     const wssePromise = require('./promises/wssePromise')(models);
@@ -11,9 +13,8 @@ module.exports = function(app, models) {
         casBlock: function(options) {
             return function(req, res, next) {
                 if (!req.isAuthenticated || !req.isAuthenticated()) {
-                    return res.status(403).json({
-                        error: 'Not Authorized'
-                    });
+                    throw new errors.NotAuthenticated(
+                        'Requires CAS credentials');
                 }
                 next();
             }
@@ -45,7 +46,8 @@ module.exports = function(app, models) {
                     req.user = user;
                     next();
                 }).catch(function(error) {
-                    res.status(401).json(error);
+                    throw new errors.NotAuthenticated(
+                        'Improper WSSE credentials');
                 })
             }
         }

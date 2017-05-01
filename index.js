@@ -9,6 +9,10 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
+const errors = require('feathers-errors');
+const handler = require('feathers-errors/handler');
+const notFound = require('feathers-errors/not-found');
+
 var path = require('path');
 // var favicon = require('serve-favicon');
 
@@ -71,6 +75,9 @@ app.get('*', auth.casBounce(), function(req, res) {
 
 //Load the socket file
 require('./sockets')(socketOptions);
+
+app.use(notFound());
+app.use(handler());
 
 //sync all sequelize models
 db.sequelize.sync({

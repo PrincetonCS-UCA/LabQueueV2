@@ -52,6 +52,32 @@ module.exports = function(models) {
 
     }
 
+    function createDefaultPolicy(queueId, role) {
+        return models.Queue.findOne({
+            where: {
+                id: queueId
+            },
+            include: [{
+                model: models.Course,
+                attributes: ['id'],
+                through: {
+                    attributes: []
+                }
+            }, {
+                model: models.Room,
+                attributes: ['id'],
+                through: {
+                    attributes: []
+                }
+            }, ]
+        }).then(function(dbQueue) {
+            var rule = {
+                courses: getArraysOfIds(dbQueue.courses),
+                rooms: getArraysOfIds(dbQueue.rooms)
+            };
+        })
+    }
+
     function findPoliciesThatFitRules(queueId, rules) {
 
     }
