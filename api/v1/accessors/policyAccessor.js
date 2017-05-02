@@ -11,28 +11,9 @@ const associations = require('../../../enums/associations');
 
 const getArraysOfIds = require('../../../utils/getArraysOfIds');
 
+const ruleUtils = require('./utils/rules');
+
 module.exports = function(models) {
-
-    // RULES
-    ///////////
-
-    var ruleSchema = {
-        'type': 'object',
-        'properties': {
-            'courses': {
-                'type': ['string', 'array'],
-                'items': {
-                    'type': 'string'
-                }
-            },
-            'rooms': {
-                'type': ['string', 'array'],
-                'items': {
-                    'type': 'string'
-                }
-            }
-        }
-    }
 
     // ERRORS
     //////////
@@ -40,19 +21,19 @@ module.exports = function(models) {
         Error.apply(this, arguments);
     };
 
-    // UTILS
-    /////////
-
-    function fitsRule(criteria, rule) {
-        // check if the criteria (a rule) fits into the rule
-
+    function createPolicy(queueId, name, role, rules) {
+        return models.Policy.create({
+            name: name,
+            role: role,
+            rules: JSON.stringify(rules)
+        }).then(function(dbPolicy) {
+            return dbPolicy.setQueue(queueId).then(function() {
+                return Promise.resolve(dbPolicy);
+            });
+        });
     }
 
-    function createPolicy(queueId, role, rules) {
-
-    }
-
-    function createDefaultPolicy(queueId, role) {
+    function getDefaultRulesForQueue(queueId) {
         return models.Queue.findOne({
             where: {
                 id: queueId
@@ -75,15 +56,24 @@ module.exports = function(models) {
                 courses: getArraysOfIds(dbQueue.courses),
                 rooms: getArraysOfIds(dbQueue.rooms)
             };
+            console.log(rule);
+            console.log(dbQueue.courses);
+            return Promise.resolve(rule);
+        });
+    }
+
+    function createDefaultPolicy(queueId, role) {
+        return getDefaultRulesForQueue(queueId).then(function(rule) {
+            return createPolicy(queueId, "default", role, [rule]);
         })
     }
 
-    function findPoliciesThatFitRules(queueId, rules) {
-
-    }
-
-    function findPolicy(queueId, role) {
-        return models.Policy.findOne({
+    /**
+     * Returns all policies that match the given role, and can interact with the 
+     * request (e.g. has a rule that matches the courses and rooms of the request)
+     */
+    function findPoliciesThatFitRequest(queueId, role, request) {
+        return models.Policy.findAll({
             where: {
                 queueId: queueId,
                 role: role
@@ -95,8 +85,89 @@ module.exports = function(models) {
                     attributes: []
                 }
             }]
-        });
+        }).then(function(policies) {
+            // take out those that don't match the rules
 
+            var matchingPolicies = [];
+            for (var i = 0; i < policies.length; i++) {
+                var rules = JSON.parse(policies[i].rules);
+                if (ruleUtils.fitsRule(request, rules)) {
+                    matchingPolicies.push(policies[i]);
+                }
+            }
+
+            return Promise.resolve(matchingPolicies);
+        });
+    }
+
+    function findPolicyById(policyId) {
+        return models.Policy.findOne({
+            where: {
+                id: policyId
+            },
+            include: [{
+                model: models.User,
+                attributes: ['id', 'name'],
+                through: {
+                    attributes: []
+                }
+            }]
+        });
+    }
+
+    // TODO: Test this!
+    function findPolicy(queueId, role, rules) {
+        return models.Policy.findAll({
+            where: {
+                queueId: queueId,
+                role: role
+            },
+            include: [{
+                model: models.User,
+                attributes: ['id', 'name'],
+                through: {
+                    attributes: []
+                }
+            }]
+        }).then(function(policies) {
+            for (var i = 0; i < policies.length; i++) {
+                var policy = policies[i];
+                var r = JSON.parse(policy.rules);
+                if (_.isEqual(r, rules)) {
+                    return Promise.resolve(policy);
+                }
+            }
+            return Promise.resolve(null);
+        });
+    }
+
+    // TODO: Test this!
+    function findPoliciesForUser(queueId, casId) {
+        return models.Policy.findAll({
+            where: {
+                queueId: queueId,
+                role: role
+            },
+            include: [{
+                model: models.User,
+                attributes: ['id', 'name'],
+                through: {
+                    attributes: []
+                }
+            }]
+        }).then(function(policies) {
+            var matchingPolicies = [];
+            for (var i = 0; i < policies.length; i++) {
+                var policy = policies[i];
+                var index = _.findIndex(policy.users, function(o) {
+                    return o.id = casId;
+                });
+                if (index != -1) {
+                    matchingPolicies.push(policy);
+                }
+            }
+            return Promise.resolve(matchingPolicies);
+        })
     }
 
     function findAllPoliciesForQueue(queueId) {
@@ -160,8 +231,16 @@ module.exports = function(models) {
     }
 
     return {
+        createPolicy: createPolicy,
+        createDefaultPolicy: createDefaultPolicy,
+
+        getDefaultRulesForQueue: getDefaultRulesForQueue,
+
         findPolicy: findPolicy,
+        findPolicyById: findPolicyById,
         findAllPoliciesForQueue: findAllPoliciesForQueue,
+        findPoliciesThatFitRequest: findPoliciesThatFitRequest,
+        findPoliciesForUser: findPoliciesForUser,
         changePolicyMembers: changePolicyMembers
     };
 

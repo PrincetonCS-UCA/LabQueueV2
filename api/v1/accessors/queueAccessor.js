@@ -7,7 +7,7 @@ const associations = require('../../../enums/associations');
 const getArraysOfIds = require('../../../utils/getArraysOfIds');
 
 const Promise = require('bluebird');
-
+const _ = require('lodash');
 const Validator = require('jsonschema').Validator;
 var v = new Validator();
 
@@ -99,14 +99,15 @@ module.exports = function(models) {
         }).then(function(dbQueue) {
             this.queue = dbQueue;
             return dbQueue.setOwner(ownerId);
-        }).then(function() {
-            return policyAccessor.changePolicyMembers(this.queue.id,
-                policyTypes.ta, [ownerId], associations.add
-            );
         }).then(function(result) {
             return this.queue.setCourses(this.courses);
         }).then(function(result) {
             return this.queue.setRooms(this.rooms);
+        }).then(function() {
+            return policyAccessor.createDefaultPolicy(this.queue.id,
+                policyTypes.ta);
+        }).then(function(policy) {
+            return policy.addUsers([ownerId]);
         }).then(function() {
             return findQueue(this.queue.id);
         }).catch(function(e) {
@@ -159,10 +160,9 @@ module.exports = function(models) {
         });
     }
 
-    function findRequest(queueId, requestId) {
+    function findRequest(requestId) {
         return models.Request.findOne({
             where: {
-                queueId: queueId,
                 id: requestId
             }
         });
@@ -180,7 +180,22 @@ module.exports = function(models) {
         });
     }
 
-    function findCurrentRequestsInQueue(queueId) {
+    function findActiveRequestsThatMatchRule(queueId, rule) {
+        return models.Request.findAll({
+            where: {
+                queueId: queueId,
+                status: requestStatuses.in_queue,
+                courseId: {
+                    $in: rule.courses
+                },
+                roomId: {
+                    $in: rule.rooms
+                }
+            }
+        })
+    }
+
+    function findActiveRequestsInQueue(queueId) {
         return models.Request.findAll({
             where: {
                 queueId: queueId,
@@ -198,7 +213,7 @@ module.exports = function(models) {
     }
 
     function changeRequestStatus(queueId, requestId, status, editorUserId) {
-        return findRequest(queueId, requestId).then(function(request) {
+        return findRequest(requestId).then(function(request) {
             if (!request) {
                 throw new RequestNotFoundError();
             }
@@ -217,7 +232,7 @@ module.exports = function(models) {
         RequestAlreadyExistsError: RequestAlreadyExistsError,
         InvalidQueueError: InvalidQueueError,
 
-        findCurrentRequestsInQueue: findCurrentRequestsInQueue,
+        findActiveRequestsInQueue: findActiveRequestsInQueue,
         findActiveRequestByAuthor: findActiveRequestByAuthor,
 
         createQueue: createQueue,

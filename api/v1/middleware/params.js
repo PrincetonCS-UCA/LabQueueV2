@@ -50,4 +50,17 @@ module.exports = function(app, models) {
     };
 
     app.param('profile', profileParam);
+
+    var requestParam = function(req, res, next, id) {
+        queueAccessor.findRequest(id).then(function(request) {
+            req.request = request;
+            return next();
+        }).catch(function(err) {
+            return next(err);
+        });
+    }
+
+    app.param('request', requestParam);
+
+    // we should also have a request param
 }

@@ -7,6 +7,7 @@ const associations = require('../../../enums/associations');
 const Promise = require('bluebird');
 
 const stringifyError = require('../../../utils/stringifyError');
+const errors = require('feathers-errors');
 
 module.exports = function(app, models) {
 
@@ -58,7 +59,7 @@ module.exports = function(app, models) {
 
     function getQueueActive(req, res) {
 
-        queueAccessor.findCurrentRequestsInQueue(req.queue.id).then(function(
+        queueAccessor.findActiveRequestsInQueue(req.queue.id).then(function(
             requests) {
             res.json(requests);
         }).catch(function(e) {
@@ -105,11 +106,11 @@ module.exports = function(app, models) {
 
     function getSingleRequest(req, res) {
         // TODO
-        res.status(404, "Unimplemented");
+        res.json(req.request);
     }
 
     function editSingleRequest(req, res) {
-        res.status(404, "Unimplemented");
+        throw new errors.NotImplemented();
     }
 
     function getActiveRequestByUser(req, res) {
@@ -154,11 +155,11 @@ module.exports = function(app, models) {
     }
 
     function claimRequest(req, res) {
-        res.status(404, "Unimplemented");
+        throw new errors.NotImplemented();
     }
 
     function completeRequest(req, res) {
-        res.status(404, "Unimplemented");
+        throw new errors.NotImplemented();
     }
 
     return {

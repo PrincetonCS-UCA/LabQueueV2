@@ -17,7 +17,7 @@ module.exports = function(app, models) {
     }
 
     function getOnePolicy(req, res, next) {
-        policyAccessor.findPolicy(req.queue.id, req.params.role).then(function(
+        policyAccessor.findPolicById(req.queue.id, req.params.policy).then(function(
             policy) {
             if (!policy) {
                 return next('route');

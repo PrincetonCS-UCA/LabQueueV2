@@ -59,7 +59,7 @@ describe('Loading Express', function() {
         });
     });
 
-    describe('Requests', function() {
+    describe('Policies', function() {
 
         var requestUtils = [];
         before(function(done) {
@@ -85,62 +85,6 @@ describe('Loading Express', function() {
                 done();
             });
 
-        })
-        describe('create requests', function() {
-            it('should create a request in the queue', function(done) {
-                var req = requestUtils[0].createRequest(server,
-                    '/api/v1/queue/test-queue/requests',
-                    'POST', {});
-
-                req.end(function(error,
-                    response) {
-                    var res = response.body;
-                    should.not.exist(
-                        error);
-                    console.log(res);
-                    assert.equal(res.authorId, users[0].username);
-                    assert.equal(res.status,
-                        requestStatuses.in_queue);
-                    done();
-                });
-            });
-
-            it('should create another request in the queue', function(done) {
-                var req = requestUtils[1].createRequest(server,
-                    '/api/v1/queue/test-queue/requests',
-                    'POST', {});
-
-                req.end(function(error,
-                    response) {
-                    var res = response.body;
-                    should.not.exist(
-                        error);
-                    console.log(res);
-                    assert.equal(res.authorId, users[1].username);
-                    assert.equal(res.status,
-                        requestStatuses.in_queue);
-                    done();
-                });
-            });
-
-            it('should not allow a non-TA to claim the request', function(
-                done) {
-                var req = requestUtils[1].createRequest(server,
-                    '/api/v1/queue/test-queue/requests',
-                    'POST', {});
-
-                req.end(function(error,
-                    response) {
-                    var res = response.body;
-                    should.not.exist(
-                        error);
-                    console.log(res);
-                    assert.equal(res.authorId, users[1].username);
-                    assert.equal(res.status,
-                        requestStatuses.in_queue);
-                    done();
-                });
-            });
         });
     });
 })
