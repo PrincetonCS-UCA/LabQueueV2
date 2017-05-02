@@ -24,6 +24,4 @@ module.exports = function(app, models, prefix) {
 
     app.route(prefix + 'wsse/:service')
         .get(auth.casBounce(), Controller.getWSSEKey);
-
-    return app;
 }
