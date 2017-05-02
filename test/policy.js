@@ -12,6 +12,7 @@ const dbUtils = require('./util/dbUtils');
 const service = "test";
 
 const requestStatuses = require('../enums/requestStatuses');
+const policyTypes = require('../enums/policyTypes');
 
 const users = [{
     username: "test1",
@@ -25,7 +26,6 @@ describe('Loading Express', function() {
 
     var server;
     before(function(done) {
-        console.log("Loading Express");
         server = require('../index');
         db.sequelize.sync({
             force: true
@@ -59,9 +59,10 @@ describe('Loading Express', function() {
         });
     });
 
-    describe('Policies', function() {
+    describe('Policy Accessor', function() {
 
         var requestUtils = [];
+        var policyAccessor;
         before(function(done) {
             this.timeout(5000);
 
@@ -85,6 +86,36 @@ describe('Loading Express', function() {
                 done();
             });
 
+            policyAccessor = require('../api/v1/accessors/policyAccessor')(
+                db);
+
+        });
+
+        describe('create policies', function() {
+            it('should create a policy in the queue', function(done) {
+
+                var rule = {
+                    courses: ['126'],
+                    rooms: ['121']
+                }
+                policyAccessor.createPolicy('test-queue',
+                        '126 Grad Student', policyTypes.ta, [rule])
+                    .then(function(policy) {
+                        assert.equal(policy.name,
+                            '126 Grad Student');
+                        assert.equal(policy.queueId,
+                            'test-queue');
+
+                        return policyAccessor.findPolicy(
+                            'test-queue', policyTypes.ta, [
+                                rule
+                            ]);
+                    }).then(function(policy) {
+                        should.exist(policy);
+                        done();
+                    });
+
+            });
         });
     });
 })

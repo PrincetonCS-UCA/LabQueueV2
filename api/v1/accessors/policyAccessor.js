@@ -3,6 +3,8 @@
 const Validator = require('jsonschema').Validator;
 var v = new Validator();
 
+const _ = require('lodash');
+
 const Promise = require('bluebird');
 
 const requestStatuses = require('../../../enums/requestStatuses');
@@ -22,10 +24,19 @@ module.exports = function(models) {
     };
 
     function createPolicy(queueId, name, role, rules) {
-        return models.Policy.create({
-            name: name,
-            role: role,
-            rules: JSON.stringify(rules)
+        return findPolicy(queueId, role, rules).then(function(policy) {
+            if (policy) {
+                return policy.update({
+                    name: name
+                });
+            }
+            else {
+                return models.Policy.create({
+                    name: name,
+                    role: role,
+                    rules: JSON.stringify(rules)
+                })
+            }
         }).then(function(dbPolicy) {
             return dbPolicy.setQueue(queueId).then(function() {
                 return Promise.resolve(dbPolicy);
@@ -133,7 +144,7 @@ module.exports = function(models) {
             for (var i = 0; i < policies.length; i++) {
                 var policy = policies[i];
                 var r = JSON.parse(policy.rules);
-                if (_.isEqual(r, rules)) {
+                if (_.isEqual(r.sort(), rules.sort())) {
                     return Promise.resolve(policy);
                 }
             }
@@ -185,15 +196,19 @@ module.exports = function(models) {
         });
     }
 
-    function changePolicyMembers(queueId, role, userIds, operation) {
+    function changePolicyMembers(queueId, role, rules, userIds, operation) {
 
         function performOp(policy, userIds, op) {
             switch (op) {
                 case associations.add:
-                    return policy.addUsers(userIds);
+                    return removeUsersFromOtherPolicies(queueId, userIds).then(function() {
+                        return policy.addUsers(userIds);
+                    });
                     break;
                 case associations.set:
-                    return policy.setUsers(userIds);
+                    return removeUsersFromOtherPolicies(queueId, userIds).then(function() {
+                        return policy.setUsers(userIds);
+                    });
                     break;
                 case assocations.remove:
                     return policy.removeUsers(userIds);
@@ -204,28 +219,31 @@ module.exports = function(models) {
             }
         }
 
+        function removeUsersFromOtherPolicies(queueId, userIds) {
+            return Promise.map(userIds, function(userId) {
+                return findPoliciesForUser(userId).then(function(policies) {
+                    return Promise.map(policies, function(policy) {
+                        return policy.removeUsers([userId]);
+                    });
+                });
+            });
+        }
+
         // TODO: use remove and add and set for the same thing here!
-        return models.Policy.findOne({
-            where: {
-                queueId: queueId,
-                role: role
-            }
-        }).then(function(policy) {
+        return findPolicy(queueId, role, rules).then(function(policy) {
             if (policy) {
                 // we have the policy already, so just add the user to it
                 return performOp(policy, userIds, operation);
             }
             else {
-                return models.Policy.create({
-                    role: role
-                }).then(function(dbPolicy) {
-                    return dbPolicy.setQueue(queueId).then(function() {
-                        return performOp(dbPolicy, userIds, operation);
-                    }).then(function() {
-                        return dbPolicy.save();
+                return createPolicy(queueId, "Unnamed Policy", roles, rules).then(
+                    function(dbPolicy) {
+                        return dbPolicy.setQueue(queueId).then(function() {
+                            return performOp(dbPolicy, userIds, operation);
+                        }).then(function() {
+                            return dbPolicy.save();
+                        });
                     });
-                });
-
             }
         })
     }

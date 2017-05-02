@@ -1,2 +1,2 @@
-* set it so you create the names of rooms / courses, with ids being premade as slugs
+* have a function that clears all users from policies in a queue
 * allow queries to find all requests that match a rule
