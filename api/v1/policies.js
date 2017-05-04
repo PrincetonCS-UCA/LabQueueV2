@@ -15,5 +15,4 @@ module.exports = function(app, models, prefix) {
 
     app.route(prefix + 'queue/:queue/policies/:policy')
         .get(auth.isAuthenticated(), Controller.getOnePolicy);
-    // permissions are uniquely ID'd by a combination of the queue and the role
 }

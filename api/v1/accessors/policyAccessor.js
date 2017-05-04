@@ -23,7 +23,7 @@ module.exports = function(models) {
         Error.apply(this, arguments);
     };
 
-    function createPolicy(queueId, name, role, rules) {
+    function createOrUpdatePolicy(queueId, name, role, rules) {
         return findPolicy(queueId, role, rules).then(function(policy) {
             if (policy) {
                 return policy.update({
@@ -75,7 +75,7 @@ module.exports = function(models) {
 
     function createDefaultPolicy(queueId, role) {
         return getDefaultRulesForQueue(queueId).then(function(rule) {
-            return createPolicy(queueId, "default", role, [rule]);
+            return createOrUpdatePolicy(queueId, "default", role, [rule]);
         })
     }
 
@@ -196,7 +196,7 @@ module.exports = function(models) {
         });
     }
 
-    function changePolicyMembers(queueId, role, rules, userIds, operation) {
+    function editPolicy(queueId, name, role, rules, userIds, operation) {
 
         function performOp(policy, userIds, op) {
             switch (op) {
@@ -231,25 +231,20 @@ module.exports = function(models) {
 
         // TODO: use remove and add and set for the same thing here!
         return findPolicy(queueId, role, rules).then(function(policy) {
-            if (policy) {
-                // we have the policy already, so just add the user to it
-                return performOp(policy, userIds, operation);
-            }
-            else {
-                return createPolicy(queueId, "Unnamed Policy", roles, rules).then(
-                    function(dbPolicy) {
-                        return dbPolicy.setQueue(queueId).then(function() {
-                            return performOp(dbPolicy, userIds, operation);
-                        }).then(function() {
-                            return dbPolicy.save();
-                        });
+            return createOrUpdatePolicy(queueId, name, roles, rules).then(
+                function(dbPolicy) {
+                    return dbPolicy.setQueue(queueId).then(function() {
+                        return performOp(dbPolicy, userIds, operation);
+                    }).then(function() {
+                        return dbPolicy.save();
                     });
-            }
+                });
+
         })
     }
 
     return {
-        createPolicy: createPolicy,
+        createOrUpdatePolicy: createOrUpdatePolicy,
         createDefaultPolicy: createDefaultPolicy,
 
         getDefaultRulesForQueue: getDefaultRulesForQueue,
@@ -259,7 +254,7 @@ module.exports = function(models) {
         findAllPoliciesForQueue: findAllPoliciesForQueue,
         findPoliciesThatFitRequest: findPoliciesThatFitRequest,
         findPoliciesForUser: findPoliciesForUser,
-        changePolicyMembers: changePolicyMembers
+        editPolicy: editPolicy
     };
 
 }

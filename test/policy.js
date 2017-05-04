@@ -98,7 +98,7 @@ describe('Loading Express', function() {
                     courses: ['126'],
                     rooms: ['121']
                 }
-                policyAccessor.createPolicy('test-queue',
+                policyAccessor.createOrUpdatePolicy('test-queue',
                         '126 Grad Student', policyTypes.ta, [rule])
                     .then(function(policy) {
                         assert.equal(policy.name,
