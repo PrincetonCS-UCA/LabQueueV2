@@ -43,7 +43,17 @@ function fitsRule(request, rule) {
 
 }
 
+function fitsRulesList(request, rules) {
+    for (var i = 0; i < rules.length; i++) {
+        if (fitsRule(request, rules[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
 module.exports = {
     ruleSchema: ruleSchema,
-    fitsRule: fitsRule
+    fitsRule: fitsRule,
+    fitsRulesList: fitsRulesList
 };

@@ -30,7 +30,7 @@ module.exports = function(app, models) {
                     for (var i = 0; i < policies.length; i++) {
                         var policy = policies[i];
                         var rules = JSON.parse(policy.rules);
-                        if (ruleUtils.fitsRule(req.request, rules)) {
+                        if (ruleUtils.fitsRulesList(req.request, rules)) {
                             return next();
                         }
                     }

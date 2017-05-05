@@ -68,6 +68,13 @@ module.exports = function(models) {
         Error.apply(this, arguments);
     };
 
+    function RequestAlreadyExistsError(message) {
+        this.message = message;
+        this.name = "RequestAlreadyExistsError";
+    }
+    RequestAlreadyExistsError.prototype = Object.create(Error.prototype);
+    RequestAlreadyExistsError.prototype.constructor = RequestAlreadyExistsError;
+
     // METHODS
     ////////////
 
@@ -160,9 +167,10 @@ module.exports = function(models) {
         });
     }
 
-    function findRequest(requestId) {
+    function findRequest(queueId, requestId) {
         return models.Request.findOne({
             where: {
+                queueId: queueId,
                 id: requestId
             }
         });
@@ -213,7 +221,7 @@ module.exports = function(models) {
     }
 
     function changeRequestStatus(queueId, requestId, status, editorUserId) {
-        return findRequest(requestId).then(function(request) {
+        return findRequest(queueId, requestId).then(function(request) {
             if (!request) {
                 throw new RequestNotFoundError();
             }
@@ -238,6 +246,7 @@ module.exports = function(models) {
         createQueue: createQueue,
         findQueue: findQueue,
 
+        findRequest: findRequest,
         createRequest: createRequest,
         changeRequestStatus: changeRequestStatus
     };

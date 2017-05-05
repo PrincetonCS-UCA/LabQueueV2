@@ -1,5 +1,7 @@
 'use strict';
 
+const errors = require('feathers-errors');
+
 module.exports = function(app, models) {
     /// PARAMS
     ///////////
@@ -52,10 +54,24 @@ module.exports = function(app, models) {
     app.param('profile', profileParam);
 
     var requestParam = function(req, res, next, id) {
-        queueAccessor.findRequest(id).then(function(request) {
+        var queueId;
+        if (req.queue) {
+            queueId = req.queue.id;
+        }
+        else {
+            throw errors.NotFound();
+        }
+
+        console.log("We reached here");
+
+        queueAccessor.findRequest(queueId, id).then(function(request) {
+            if (!request) {
+                return next('route');
+            }
             req.request = request;
             return next();
         }).catch(function(err) {
+            console.log(err);
             return next(err);
         });
     }

@@ -77,7 +77,9 @@ app.get('*', auth.casBounce(), function(req, res) {
 require('./sockets')(socketOptions);
 
 app.use(notFound());
-app.use(handler());
+app.use(handler({
+    html: false
+}));
 
 //sync all sequelize models
 db.sequelize.sync({

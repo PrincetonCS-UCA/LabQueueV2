@@ -102,7 +102,7 @@ module.exports = function(models) {
             var matchingPolicies = [];
             for (var i = 0; i < policies.length; i++) {
                 var rules = JSON.parse(policies[i].rules);
-                if (ruleUtils.fitsRule(request, rules)) {
+                if (ruleUtils.fitsRulesList(request, rules)) {
                     matchingPolicies.push(policies[i]);
                 }
             }
@@ -168,6 +168,8 @@ module.exports = function(models) {
             }]
         }).then(function(policies) {
             var matchingPolicies = [];
+            // we assume that policies.length is a small number
+            // if there are too many, do a debug log.
             for (var i = 0; i < policies.length; i++) {
                 var policy = policies[i];
                 var index = _.findIndex(policy.users, function(o) {

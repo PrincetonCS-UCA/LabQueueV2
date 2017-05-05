@@ -23,6 +23,15 @@ module.exports = function(options) {
     require(path)(app, models, prefix);
   });
 
+  // TODO: fix this???
+  app.route(prefix + 'error')
+    .get(function(req, res, next) {
+      return Promise.resolve("e").then(function(e) {
+        next(new errors.NotImplemented(e));
+      })
+
+    })
+
   // Assume 404 since no middleware responded
   app.use(prefix, function(req, res) {
     throw new errors.NotFound();

@@ -18,7 +18,7 @@ module.exports = function(app, models) {
     /// AUTHORIZATION
     ///////////////////
 
-    function createQueue(req, res) {
+    function createQueue(req, res, next) {
 
         if (!req.body.name) {
             /* return res.status(400).json({
@@ -51,22 +51,18 @@ module.exports = function(app, models) {
         queueAccessor.createQueue(q, req.user.id).then(function(queue) {
             return res.json(queue);
         }).catch(function(e) {
-            res.status(400).json({
-                error: stringifyError(e)
-            });
+            next(new errors.BadRequest(e));
         });;
     }
 
-    function getQueueActive(req, res) {
+    function getQueueActive(req, res, next) {
 
         queueAccessor.findActiveRequestsInQueue(req.queue.id).then(function(
             requests) {
             res.json(requests);
         }).catch(function(e) {
             // Send better user error logs.
-            res.status(400).json({
-                error: stringifyError(e)
-            });
+            next(new errors.BadRequest(e));
         });
     }
 
@@ -74,11 +70,11 @@ module.exports = function(app, models) {
         res.json(req.queue);
     }
 
-    function editQueueMeta(req, res) {
-        res.send("Unimplemented");
+    function editQueueMeta(req, res, next) {
+        next(new errors.NotImplemented());
     }
 
-    function createRequest(req, res) {
+    function createRequest(req, res, next) {
 
         var r = {
             message: "This is a request"
@@ -90,16 +86,12 @@ module.exports = function(app, models) {
                     res.json(request);
                 })
             .catch(queueAccessor.RequestAlreadyExistsError, function(e) {
-                res.status(403).json({
-                    error: 'User cannot post more than one request at a time'
-                });
+                next(new errors.BadRequest(
+                    'User cannot post more than one request at a time'));
             })
             .catch(function(e) {
-                console.log(e);
                 // Send better user error logs.
-                res.json({
-                    error: stringifyError(e)
-                });
+                next(new errors.BadRequest(e));
             });
 
     }
@@ -109,11 +101,11 @@ module.exports = function(app, models) {
         res.json(req.request);
     }
 
-    function editSingleRequest(req, res) {
-        throw new errors.NotImplemented();
+    function editSingleRequest(req, res, next) {
+        next(new errors.NotImplemented());
     }
 
-    function getActiveRequestByUser(req, res) {
+    function getActiveRequestByUser(req, res, next) {
 
         userAccessor.findUserByCasId(req.params.username).then(function(
             author) {
@@ -126,32 +118,13 @@ module.exports = function(app, models) {
         }).catch(function(e) {
             console.log(e);
             // Send better user error logs.
-            res.json({
-                error: stringifyError(e)
-            });
+            next(new errors.BadRequest(e));
         });
 
     }
 
     function cancelRequest(req, res) {
-        /*
-        userAccessor.findUserByCasId(req.params.username).then(function(author) {
-
-            return queueAccessor.changeRequestStatus(req.queue.id,
-                author.id, requestStatuses.canceled, req.user.id);
-
-        }).then(function(request) {
-
-            res.json(request);
-
-        }).catch(function(e) {
-            console.log(e);
-            // Send better user error logs.
-            res.json({
-                error: e
-            });
-        })
-        */
+        return queueAccessor.changeRequestStatus
     }
 
     function claimRequest(req, res) {
