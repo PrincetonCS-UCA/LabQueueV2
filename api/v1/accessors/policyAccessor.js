@@ -126,6 +126,27 @@ module.exports = function(models) {
         });
     }
 
+    // TODO: eventually, we want to have a more solid contract ensuring that
+    // there is only one policy per user per queue. In the meantime, though
+    // we return an array.
+    function findPoliciesByUser(queueId, casId) {
+        return models.Policy.findAll({
+            where: {
+                queueId: queueId
+            },
+            include: [{
+                model: models.User,
+                attributes: ['id', 'name'],
+                through: {
+                    attributes: []
+                },
+                where: {
+                    'id': casId
+                }
+            }]
+        });
+    }
+
     // TODO: Test this!
     function findPolicy(queueId, role, rules) {
         return models.Policy.findAll({
@@ -150,37 +171,6 @@ module.exports = function(models) {
             }
             return Promise.resolve(null);
         });
-    }
-
-    // TODO: Test this!
-    function findPoliciesForUser(queueId, casId) {
-        return models.Policy.findAll({
-            where: {
-                queueId: queueId,
-                role: role
-            },
-            include: [{
-                model: models.User,
-                attributes: ['id', 'name'],
-                through: {
-                    attributes: []
-                }
-            }]
-        }).then(function(policies) {
-            var matchingPolicies = [];
-            // we assume that policies.length is a small number
-            // if there are too many, do a debug log.
-            for (var i = 0; i < policies.length; i++) {
-                var policy = policies[i];
-                var index = _.findIndex(policy.users, function(o) {
-                    return o.id = casId;
-                });
-                if (index != -1) {
-                    matchingPolicies.push(policy);
-                }
-            }
-            return Promise.resolve(matchingPolicies);
-        })
     }
 
     function findAllPoliciesForQueue(queueId) {
@@ -223,7 +213,7 @@ module.exports = function(models) {
 
         function removeUsersFromOtherPolicies(queueId, userIds) {
             return Promise.map(userIds, function(userId) {
-                return findPoliciesForUser(userId).then(function(policies) {
+                return findPoliciesByUser(queueId, userId).then(function(policies) {
                     return Promise.map(policies, function(policy) {
                         return policy.removeUsers([userId]);
                     });
@@ -253,9 +243,9 @@ module.exports = function(models) {
 
         findPolicy: findPolicy,
         findPolicyById: findPolicyById,
+        findPoliciesByUser: findPoliciesByUser,
         findAllPoliciesForQueue: findAllPoliciesForQueue,
         findPoliciesThatFitRequest: findPoliciesThatFitRequest,
-        findPoliciesForUser: findPoliciesForUser,
         editPolicy: editPolicy
     };
 

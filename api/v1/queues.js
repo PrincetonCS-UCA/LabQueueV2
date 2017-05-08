@@ -39,8 +39,6 @@ module.exports = function(app, models, prefix) {
 
     app.route(prefix + 'queue/:queue/requests/:request/cancel')
         .get(auth.isAuthenticated(), Controller.cancelRequest);
-    app.route(prefix + 'queue/:queue/requests/:request/claim')
-        .get(auth.isAuthenticated(), Controller.claimRequest);
     app.route(prefix + 'queue/:queue/requests/:request/complete')
         .get(auth.isAuthenticated(), Controller.completeRequest);
 }

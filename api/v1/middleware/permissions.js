@@ -81,6 +81,9 @@ module.exports = function(app, models) {
         isAdmin: function() {
             return isRole(policyTypes.admin);
         },
+        isSiteAdmin: function() {
+            return true; // TODO: Implement!
+        }
         canHelpRequest: canHelpRequest,
         canEditRequest: isRequestAuthor,
         canCancelRequest: canCancelRequest

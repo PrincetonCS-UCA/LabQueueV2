@@ -34,15 +34,21 @@
     "socket.io": "^1.4.8",
     "sqlite": "^2.2.0",
     "superagent": "^3.5.2",
-    "webpack": "^1.13.2"
+    "webpack": "^2.5.1"
   },
   "devDependencies": {
     "async": "^2.3.0",
+    "css-loader": "^0.28.1",
     "express-session": "^1.15.2",
+    "extract-text-webpack-plugin": "^2.1.0",
     "mocha": "^3.3.0",
+    "node-sass": "^4.5.2",
     "really-need": "^1.9.2",
+    "sass-loader": "^6.0.3",
     "should": "^11.2.1",
     "sqlite3": "^3.1.8",
-    "supertest": "^3.0.0"
+    "style-loader": "^0.17.0",
+    "supertest": "^3.0.0",
+    "url-loader": "^0.5.8"
   }
 }

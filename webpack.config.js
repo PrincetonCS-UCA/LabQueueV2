@@ -1,25 +1,47 @@
-var webpack = require('webpack');
-var path = require('path');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path');
 
-var BUILD_DIR = path.resolve(__dirname, 'public/js');
-var APP_DIR = path.resolve(__dirname, 'app/client');
+var BUILD_DIR = path.resolve(__dirname, 'public/');
+var APP_DIR = path.resolve(__dirname, 'app/js');
+var CSS_DIR = path.resolve(__dirname, 'app/scss');
 
 var config = {
-  entry: APP_DIR + '/index.jsx',
+  entry: {
+    'bundle': [APP_DIR + '/index.jsx', CSS_DIR + '/main.scss']
+  },
   output: {
     path: BUILD_DIR,
-    filename: 'bundle.js'
+    filename: 'js/[name].js'
   },
   module: {
-    loaders: [{
+    rules: [{
       test: /\.jsx?/,
       include: APP_DIR,
-      loader: 'babel'
+      use: 'babel-loader'
+    }, {
+      test: /\.scss$/,
+      include: CSS_DIR,
+      use: ExtractTextPlugin.extract({
+        fallback: "style-loader", // Will inject the style tag if plugin fails
+        use: "css-loader!sass-loader",
+      }),
+    }, {
+      test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/,
+      loader: 'url-loader'
     }]
   },
   resolve: {
-    extensions: ['', '.json', '.jsx', '.js']
-  }
+    extensions: ['.json', '.jsx', '.js', '.scss']
+  },
+
+  plugins: [
+    new ExtractTextPlugin({
+      filename: 'css/[name].css',
+      disable: false,
+      allChunks: true
+    })
+  ]
 };
 
 module.exports = config;

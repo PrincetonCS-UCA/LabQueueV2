@@ -10,6 +10,6 @@ module.exports = function(app) {
 
     // set .html as the default extension 
     app.set('view engine', 'html');
-    app.set('views', path.join(__dirname, '..', '/app/server/views'));
+    app.set('views', path.join(__dirname, '..', '/app/views'));
 
 }

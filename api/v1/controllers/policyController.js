@@ -16,8 +16,8 @@ module.exports = function(app, models) {
         })
     }
 
-    function getOnePolicy(req, res, next) {
-        policyAccessor.findPolicById(req.queue.id, req.params.policy).then(function(
+    function getPoliciesForUser(req, res, next) {
+        policyAccessor.findPoliciesByUser(req.queue.id, req.profile.id).then(function(
             policy) {
             if (!policy) {
                 return next('route');
@@ -36,7 +36,7 @@ module.exports = function(app, models) {
 
     return {
         getPolicies: getPolicies,
-        getOnePolicy: getOnePolicy,
+        getPoliciesForUser: getPoliciesForUser,
 
         createPolicy: createPolicy
     };

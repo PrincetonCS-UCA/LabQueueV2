@@ -124,15 +124,25 @@ module.exports = function(app, models) {
     }
 
     function cancelRequest(req, res) {
-        return queueAccessor.changeRequestStatus
-    }
-
-    function claimRequest(req, res) {
-        throw new errors.NotImplemented();
+        return queueAccessor.changeRequestStatus(req.queue.id, req.request.id,
+            requestStatuses.canceled, req.user.id).then(function(request) {
+            res.json(request);
+        }).catch(function(e) {
+            console.log(e);
+            // Send better user error logs.
+            next(new errors.GeneralError(e));
+        });
     }
 
     function completeRequest(req, res) {
-        throw new errors.NotImplemented();
+        return queueAccessor.changeRequestStatus(req.queue.id, req.request.id,
+            requestStatuses.was_helped, req.user.id).then(function(request) {
+            res.json(request);
+        }).catch(function(e) {
+            console.log(e);
+            // Send better user error logs.
+            next(new errors.GeneralError(e));
+        });
     }
 
     return {
@@ -147,7 +157,6 @@ module.exports = function(app, models) {
 
         getActiveRequestByUser: getActiveRequestByUser,
         cancelRequest: cancelRequest,
-        claimRequest: claimRequest,
         completeRequest: completeRequest
     };
 }

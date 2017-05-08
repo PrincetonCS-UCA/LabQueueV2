@@ -13,6 +13,6 @@ module.exports = function(app, models, prefix) {
         .get(auth.isAuthenticated(), Controller.getPolicies)
         .post(auth.isAuthenticated(), Controller.createPolicy);
 
-    app.route(prefix + 'queue/:queue/policies/:policy')
-        .get(auth.isAuthenticated(), Controller.getOnePolicy);
+    app.route(prefix + 'queue/:queue/policies/:profile')
+        .get(auth.isAuthenticated(), Controller.getPoliciesForUser);
 }

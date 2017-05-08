@@ -36,7 +36,7 @@ module.exports = function(app, models) {
             // Yes, it's a valid ObjectId, proceed with `findById` call.
             return next('route');
         }
-        models.Users.findOne({
+        models.User.findOne({
             where: {
                 casId: id
             }
