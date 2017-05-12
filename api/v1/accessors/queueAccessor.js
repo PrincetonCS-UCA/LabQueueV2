@@ -136,7 +136,6 @@ module.exports = function(models) {
 
         return getDbQueue(queueId).bind({}).then(function(dbQueue) {
             if (!dbQueue) {
-                console.log("queue not found");
                 throw new Error("Queue not found");
             }
 
@@ -146,8 +145,7 @@ module.exports = function(models) {
             if (queueObj.description) {
                 dbQueue.description = queueObj.description;
             }
-            console.log("before saving");
-
+            
             return dbQueue.update({
                 name: dbQueue.name,
                 description: dbQueue.description
@@ -165,9 +163,7 @@ module.exports = function(models) {
         }).then(function() {
             return findQueue(this.id);
         }).then(function(dbQueue) {
-            console.log(dbQueue);
             this.queue = dbQueue;
-            console.log(this.queue.toJSON());
             var courseOp = queueObj.courses;
             if (queueObj.courses && _.isArray(queueObj.courses)) {
                 courseOp = patchUtils.createPatchFromArray(queueObj.courses);
@@ -186,8 +182,6 @@ module.exports = function(models) {
                 roomOp = patchUtils.createPatchFromArray(queueObj.rooms);
             }
             if (!roomOp) {
-                console.log("found no rooms");
-                console.log(this.queue.toJSON());
                 return findQueue(this.queue.id);
             }
             if (patchUtils.validatePatch(roomOp)) {

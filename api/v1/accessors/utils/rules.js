@@ -32,14 +32,14 @@ function fitsRule(request, rule) {
         return false;
     }
 
-    var requestCourse = convertToArray(request.courseId);
-    var requestRoom = convertToArray(request.roomId);
+    var requestCourse = request.courseId;
+    var requestRoom = request.roomId;
 
     var ruleCourses = convertToArray(rule.courses);
     var ruleRooms = convertToArray(rule.rooms);
 
-    return _.difference(requestCourse, ruleCourses).length === 0 &&
-        _.difference(requestRoom, ruleRooms).length === 0;
+    return _.findIndex(ruleCourses, requestCourse) !== -1 &&
+        _.findIndex(ruleRooms, requestRoom) !== -1;
 
 }
 

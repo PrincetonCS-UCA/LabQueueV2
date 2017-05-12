@@ -21,16 +21,20 @@ module.exports = function(sequelize, DataTypes) {
           as: "queue"
         });
         Request.belongsTo(models.User, {
-          as: "author"
+          as: "author",
+          onDelete: "NO ACTION"
         });
         Request.belongsTo(models.User, {
-          as: "helper"
+          as: "helper",
+          onDelete: "NO ACTION"
         });
         Request.belongsTo(models.Course, {
-          as: "course"
+          as: "course",
+          onDelete: "NO ACTION"
         });
         Request.belongsTo(models.Room, {
-          as: "room"
+          as: "room",
+          onDelete: "NO ACTION"
         });
       }
     }

@@ -89,7 +89,6 @@ describe("Loading Queue Accessor", function() {
                     rooms: ['121', '122']
                 };
                 accessor.createQueue(q, casId).then(function(queue) {
-                    console.log(queue.toJSON());
                     done();
                 });
             });
@@ -101,7 +100,6 @@ describe("Loading Queue Accessor", function() {
                 description: "Something else 2"
             };
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('name', q.name);
                 should(queue).have.property('description', q.description);
                 done();
@@ -115,7 +113,6 @@ describe("Loading Queue Accessor", function() {
                 name: "Something else"
             };
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('name', q.name);
                 should(queue).have.property('description',
                     "This is a test queue");
@@ -132,7 +129,6 @@ describe("Loading Queue Accessor", function() {
                 description: "This is a test queue"
             };
             accessor.createQueue(q, casId).then(function(queue) {
-                console.log(queue.toJSON());
                 return accessor.editQueueMeta(queueId, q).then(
                     function(queue) {
                         assert(false);
@@ -154,7 +150,6 @@ describe("Loading Queue Accessor", function() {
             };
 
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('courses').with.lengthOf(
                     4);
                 should(queue).have.property('rooms').with.lengthOf(
@@ -174,7 +169,6 @@ describe("Loading Queue Accessor", function() {
             };
 
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('courses').with.lengthOf(
                     2);
                 should(queue).have.property('rooms').with.lengthOf(
@@ -194,7 +188,6 @@ describe("Loading Queue Accessor", function() {
             };
 
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('courses').with.lengthOf(
                     1);
                 should(queue).have.property('rooms').with.lengthOf(
@@ -214,7 +207,6 @@ describe("Loading Queue Accessor", function() {
             };
 
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('courses').with.lengthOf(
                     3);
                 should(queue).have.property('rooms').with.lengthOf(
@@ -234,7 +226,6 @@ describe("Loading Queue Accessor", function() {
             };
 
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('courses').with.lengthOf(
                     3);
                 should(queue).have.property('rooms').with.lengthOf(
@@ -254,7 +245,6 @@ describe("Loading Queue Accessor", function() {
             };
 
             accessor.editQueueMeta(queueId, q).then(function(queue) {
-                console.log(queue);
                 should(queue).have.property('courses').with.lengthOf(
                     3);
                 should(queue).have.property('rooms').with.lengthOf(
