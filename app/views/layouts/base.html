@@ -1,8 +1,12 @@
 <html>
-  {% include "includes/header.html" %}
+  <head>
+    {% include "includes/header.html" %}
+    {% block head %}
+  </head>
   <body>
     {% block content %}<div id="app" />{% endblock %}
     
     {% include "includes/footer.html" %}
+    {% block scripts %}
   </body>
 </html>

@@ -26,13 +26,14 @@ module.exports = function(models) {
     function createOrUpdatePolicy(queueId, name, role, rules) {
         return findPolicy(queueId, role, rules).then(function(policy) {
             if (policy) {
+                name = name || policy.name;
                 return policy.update({
                     name: name
                 });
             }
             else {
                 return models.Policy.create({
-                    name: name,
+                    name: name || "Unnamed Policy",
                     role: role,
                     rules: JSON.stringify(rules)
                 })
@@ -67,8 +68,6 @@ module.exports = function(models) {
                 courses: getArraysOfIds(dbQueue.courses),
                 rooms: getArraysOfIds(dbQueue.rooms)
             };
-            console.log(rule);
-            console.log(dbQueue.courses);
             return Promise.resolve(rule);
         });
     }
@@ -136,7 +135,7 @@ module.exports = function(models) {
             },
             include: [{
                 model: models.User,
-                attributes: ['id', 'name'],
+                attributes: [],
                 through: {
                     attributes: []
                 },

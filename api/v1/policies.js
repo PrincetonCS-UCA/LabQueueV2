@@ -8,7 +8,9 @@ module.exports = function(app, models, prefix) {
 
     var Controller = require('./controllers/policyController')(app, models);
 
-    // policies
+    app.route(prefix + 'policies/:policy')
+        .get(auth.isAuthenticated(), Controller.getPolicyById);
+
     app.route(prefix + 'queue/:queue/policies')
         .get(auth.isAuthenticated(), Controller.getPolicies)
         .post(auth.isAuthenticated(), Controller.createPolicy);

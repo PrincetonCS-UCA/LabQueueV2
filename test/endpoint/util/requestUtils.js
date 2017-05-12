@@ -1,5 +1,5 @@
 var request = require('supertest');
-var wsse = require('../../vendor/wsse');
+var wsse = require('../../../vendor/wsse');
 
 module.exports = function(username, password, service) {
 

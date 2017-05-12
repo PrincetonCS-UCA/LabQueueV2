@@ -41,7 +41,6 @@ module.exports = function(app, models) {
             }
         },
         isAuthenticated: function(options) {
-            return this.casBounce();
             return function(req, res, next) {
                 return wssePromise(req.headers).then(function(user) {
                     req.user = user;

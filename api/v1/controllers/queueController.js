@@ -71,7 +71,18 @@ module.exports = function(app, models) {
     }
 
     function editQueueMeta(req, res, next) {
-        next(new errors.NotImplemented());
+        var q = {
+            name: req.body.name,
+            description: req.body.description,
+            courses: req.body.courses,
+            rooms: req.body.rooms
+        };
+
+        queueAccessor.editQueueMeta(req.queue.id, q).then(function(queue) {
+            res.json(queue);
+        }).catch(function(e) {
+            next(new errors.BadRequest(e));
+        })
     }
 
     function createRequest(req, res, next) {

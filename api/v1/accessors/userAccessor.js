@@ -13,8 +13,17 @@ module.exports = function(models) {
         });
     }
 
+    function createUser(casId, name, universityId) {
+        return models.User.create({
+            casId: casId,
+            name: name,
+            universityId: universityId
+        });
+    }
+
     return {
-        findUserByCasId: findUserByCasId
+        findUserByCasId: findUserByCasId,
+        createUser: createUser
     };
 
 }

@@ -5,13 +5,13 @@ var should = require('should');
 
 const async = require('async');
 
-const db = require('../models');
+const db = require('../../models');
 
 const RequestUtils = require('./util/requestUtils');
 const dbUtils = require('./util/dbUtils');
 const service = "test";
 
-const requestStatuses = require('../enums/requestStatuses');
+const requestStatuses = require('../../enums/requestStatuses');
 
 const users = [{
     username: "test1",
@@ -25,10 +25,12 @@ describe('Loading Express', function() {
 
     var server;
     before(function(done) {
-        console.log("Loading Express");
-        server = require('../index');
-        db.sequelize.sync({
-            force: true
+        var serverPromise = require('../../server');
+        serverPromise.then(function(app) {
+            server = app;
+            return db.sequelize.sync({
+                force: true
+            })
         }).then(function() {
 
             async.series([

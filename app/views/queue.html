@@ -1,1 +1,15 @@
-queue
+{% extends "layouts/base.html" %}
+
+{% block content %}<div id="app" />{% endblock %} 
+
+{% block scripts %}
+<script type="text/javascript">
+    window.user = JSON.parse('{{user|safe}}');
+</script>
+
+{% if policies %}
+<script type="text/javascript">
+    window.policies = JSON.parse('{{policies|safe}}');
+</script>
+{% endif %}
+{% endblock %}

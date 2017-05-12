@@ -6,6 +6,10 @@ const associations = require('../../../enums/associations');
 
 const getArraysOfIds = require('../../../utils/getArraysOfIds');
 
+const patchUtils = require('./utils/patchOps');
+
+var convertToSlug = require('../../../utils/convertSlug');
+
 const Promise = require('bluebird');
 const _ = require('lodash');
 const Validator = require('jsonschema').Validator;
@@ -78,6 +82,21 @@ module.exports = function(models) {
     // METHODS
     ////////////
 
+    /* 
+     Utility function to retrieve a sequelize object, returning a promise with the 
+     sequelize object. If the input is a queue Id, the function will fetch the 
+     sequelize object from the database
+     */
+    function getDbQueue(dbQueueOrQueueId) {
+        if (_.isString(dbQueueOrQueueId)) {
+            return findQueue(dbQueueOrQueueId);
+        }
+        else {
+            // it's a sequelize instance already
+            return Promise.resolve(dbQueueOrQueueId);
+        }
+    }
+
     function createQueue(queueObj, ownerId) {
 
         if (!v.validate(queueObj, queueObjSchema).valid) {
@@ -89,27 +108,17 @@ module.exports = function(models) {
 
         var q = {
             name: queueObj.name,
-            description: queueObj.description || ''
+            description: queueObj.description || '',
+            id: convertToSlug(queueObj.name)
         };
 
-        return Promise.map(queueObj.courses, function(course) {
-            return courseAccessor.createOrFindCourse(course);
-        }).bind({}).then(function(courseObjs) {
-            this.courses = courseObjs;
-            return Promise.map(queueObj.rooms, function(room) {
-                return roomAccessor.createOrFindRoom(room);
-            });
-        }).then(function(roomObjs) {
-            this.rooms = roomObjs;
-        }).then(function() {
-            return models.Queue.create(q);
-        }).then(function(dbQueue) {
+        return models.Queue.create(q).then(function(dbQueue) {
             this.queue = dbQueue;
             return dbQueue.setOwner(ownerId);
         }).then(function(result) {
-            return this.queue.setCourses(this.courses);
+            return editQueueCourses(this.queue, queueObj.courses, associations.set);
         }).then(function(result) {
-            return this.queue.setRooms(this.rooms);
+            return editQueueRooms(this.queue, queueObj.rooms, associations.set);
         }).then(function() {
             return policyAccessor.createDefaultPolicy(this.queue.id,
                 policyTypes.ta);
@@ -121,6 +130,132 @@ module.exports = function(models) {
             throw e;
         });
 
+    }
+
+    function editQueueMeta(queueId, queueObj) {
+
+        return getDbQueue(queueId).bind({}).then(function(dbQueue) {
+            if (!dbQueue) {
+                console.log("queue not found");
+                throw new Error("Queue not found");
+            }
+
+            if (queueObj.name) {
+                dbQueue.name = queueObj.name;
+            }
+            if (queueObj.description) {
+                dbQueue.description = queueObj.description;
+            }
+            console.log("before saving");
+
+            return dbQueue.update({
+                name: dbQueue.name,
+                description: dbQueue.description
+            });
+        }).then(function(dbQueue) {
+            var id = convertToSlug(dbQueue.name);
+            this.id = id;
+            return models.Queue.update({
+                id: id
+            }, {
+                where: {
+                    id: dbQueue.id
+                }
+            });
+        }).then(function() {
+            return findQueue(this.id);
+        }).then(function(dbQueue) {
+            console.log(dbQueue);
+            this.queue = dbQueue;
+            console.log(this.queue.toJSON());
+            var courseOp = queueObj.courses;
+            if (queueObj.courses && _.isArray(queueObj.courses)) {
+                courseOp = patchUtils.createPatchFromArray(queueObj.courses);
+            }
+            if (!courseOp) {
+                return Promise.resolve(this.queue);
+            }
+            if (patchUtils.validatePatch(courseOp)) {
+                throw new patchUtils.InvalidPatchError(
+                    "Invalid format for updating courses");
+            }
+            return editQueueCourses(this.queue, courseOp.values, courseOp.op);
+        }).then(function(result) {
+            var roomOp = queueObj.rooms;
+            if (queueObj.rooms && _.isArray(queueObj.rooms)) {
+                roomOp = patchUtils.createPatchFromArray(queueObj.rooms);
+            }
+            if (!roomOp) {
+                console.log("found no rooms");
+                console.log(this.queue.toJSON());
+                return findQueue(this.queue.id);
+            }
+            if (patchUtils.validatePatch(roomOp)) {
+                throw new patchUtils.InvalidPatchError(
+                    "Invalid format for updating courses");
+            }
+            var self = this;
+            return editQueueRooms(this.queue, roomOp.values, roomOp.op).then(function() {
+                return findQueue(self.queue.id);
+            });
+        });
+
+    }
+
+    function changeQueueOwner(queueId, ownerId) {
+        return getDbQueue(queueId).then(function(dbQueue) {
+            return dbQueue.setOwner(ownerId);
+        });
+    }
+
+    function editQueueCourses(dbQueueOrQueueId, courses, op) {
+
+        return Promise.map(courses, function(course) {
+            return courseAccessor.createOrFindCourse(course);
+        }).bind({}).then(function(dbCourses) {
+            this.courses = dbCourses;
+            return getDbQueue(dbQueueOrQueueId);
+        }).then(function(dbQueue) {
+            switch (op) {
+                case associations.set:
+                    return dbQueue.setCourses(this.courses);
+                    break;
+                case associations.add:
+                    return dbQueue.addCourses(this.courses);
+                    break;
+                case associations.remove:
+                    return dbQueue.removeCourses(this.courses);
+                    break;
+                default:
+                    return Promise.reject(new Error(
+                        'Invalid operation when patching courses'));
+            }
+        });
+
+    }
+
+    function editQueueRooms(dbQueueOrQueueId, rooms, op) {
+        return Promise.map(rooms, function(room) {
+            return roomAccessor.createOrFindRoom(room);
+        }).bind({}).then(function(dbRooms) {
+            this.rooms = dbRooms;
+            return getDbQueue(dbQueueOrQueueId);
+        }).then(function(dbQueue) {
+            switch (op) {
+                case associations.set:
+                    return dbQueue.setRooms(this.rooms);
+                    break;
+                case associations.add:
+                    return dbQueue.addRooms(this.rooms);
+                    break;
+                case associations.remove:
+                    return dbQueue.removeRooms(this.rooms);
+                    break;
+                default:
+                    return Promise.reject(new Error(
+                        'Invalid operation when patching rooms'));
+            }
+        });
     }
 
     function findQueue(queueId) {
@@ -245,6 +380,10 @@ module.exports = function(models) {
 
         createQueue: createQueue,
         findQueue: findQueue,
+
+        editQueueMeta: editQueueMeta,
+        editQueueCourses: editQueueCourses,
+        editQueueRooms: editQueueRooms,
 
         findRequest: findRequest,
         createRequest: createRequest,

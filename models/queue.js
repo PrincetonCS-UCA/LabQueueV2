@@ -1,26 +1,18 @@
 "use strict";
 
-var convertToSlug = require('../utils/convertSlug');
-
 module.exports = function(sequelize, DataTypes) {
   var Queue = sequelize.define("queue", {
     name: {
       type: DataTypes.STRING,
       unique: true,
-      allowNull: false,
-      set: function(val) {
-        // has to set itself first...
-        this.setDataValue('name', val);
-
-        val = val.toLowerCase().trim();
-        this.setDataValue('id', convertToSlug(val));
-      }
+      allowNull: false
     },
     description: DataTypes.STRING,
     id: {
       type: DataTypes.STRING,
       unique: true,
-      primaryKey: true
+      primaryKey: true,
+      allowNull: false
     }
   }, {
     classMethods: {
