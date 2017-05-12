@@ -156,7 +156,7 @@ describe('Loading Express', function() {
                             console.log(res);
                             should.not.exist(
                                 error);
-                            assert.equal(res.courses.length,
+                        assert.equal(res.courses.length,
                                 1);
                             done();
                         });

@@ -32,7 +32,7 @@ module.exports = function(app, models, prefix) {
         .post(auth.isAuthenticated(), Controller.createRequest);
 
     // test routes
-    app.get(prefix + 'queue/create', auth.isAuthenticated(), Controller.createQueue);
+    app.get(prefix + 'queue/create', auth.isAuthenticated(), Controller.createQueueTest);
 
     app.route(prefix + 'queue/:queue/create')
         .get(auth.isAuthenticated(), Controller.createRequest);

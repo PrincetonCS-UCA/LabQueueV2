@@ -2,28 +2,25 @@
 
 module.exports = function(models) {
 
-    function createCourse(courseObj) {
-        return models.Course.create(courseObj);
-    }
-
     function createOrFindCourse(courseId) {
-        return models.Course.findOne({
+        return models.Course.findCreateFind({
             where: {
                 id: courseId
             }
-        }).then(function(dbCourse) {
-            if (!dbCourse) {
-                return createCourse({
-                    id: courseId
-                });
-            }
-            return dbCourse.save();
+        }).spread(function(dbCourse, created) {
+            return Promise.resolve(dbCourse);
+        });
+    }
+
+    function bulkCreateCourses(courses) {
+        return Promise.map(courses, function(course) {
+            return createOrFindCourse(course);
         });
     }
 
     return {
-        createCourse: createCourse,
-        createOrFindCourse: createOrFindCourse
+        createOrFindCourse: createOrFindCourse,
+        bulkCreateCourses: bulkCreateCourses
     };
 
 }

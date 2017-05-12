@@ -1,5 +1,7 @@
 "use strict";
 
+const getArraysOfIds = require('../utils/getArraysOfIds');
+
 module.exports = function(sequelize, DataTypes) {
   var Queue = sequelize.define("queue", {
     name: {
@@ -28,6 +30,20 @@ module.exports = function(sequelize, DataTypes) {
           through: "queueRooms",
           foreignKey: 'queueId'
         });
+      }
+    },
+    instanceMethods: {
+      toJSON: function() {
+        var values = this.get();
+        // Do your magic here 
+
+        if (values.courses) {
+          values.courses = getArraysOfIds(values.courses);
+        }
+        if (values.rooms) {
+          values.rooms = getArraysOfIds(values.rooms);
+        }
+        return values;
       }
     }
   });

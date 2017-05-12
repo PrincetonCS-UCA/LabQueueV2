@@ -49,11 +49,26 @@ module.exports = function(app, models) {
         };
 
         queueAccessor.createQueue(q, req.user.id).then(function(queue) {
-            return res.json(queue);
+            return res.json(queue.toJSON());
         }).catch(function(e) {
             next(new errors.BadRequest(e));
-        });;
+        });
     }
+
+    function createQueueTest(req, res, next) {
+        var q = {
+            name: "Test Queue",
+            description: "Description",
+            courses: ['126', '226', '217'],
+            rooms: ['121', '122']
+        };
+
+        queueAccessor.createQueue(q, req.user.id).then(function(queue) {
+            return res.json(queue.toJSON());
+        }).catch(function(e) {
+            next(new errors.BadRequest(e));
+        });
+    };
 
     function getQueueActive(req, res, next) {
 
@@ -168,6 +183,8 @@ module.exports = function(app, models) {
 
         getActiveRequestByUser: getActiveRequestByUser,
         cancelRequest: cancelRequest,
-        completeRequest: completeRequest
+        completeRequest: completeRequest,
+
+        createQueueTest: createQueueTest
     };
 }
