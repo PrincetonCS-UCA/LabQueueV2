@@ -12,6 +12,9 @@ var convertToSlug = require('../../../utils/convertSlug');
 
 const Promise = require('bluebird');
 const _ = require('lodash');
+
+const makeError = require('make-error');
+
 const Validator = require('jsonschema').Validator;
 var v = new Validator();
 
@@ -60,24 +63,9 @@ module.exports = function(models) {
 
     // ERRORS
     //////////
-    var InvalidQueueError = function() {
-        Error.apply(this, arguments);
-    };
-
-    var RequestNotFoundError = function() {
-        Error.apply(this, arguments);
-    };
-
-    var RequestAlreadyExistsError = function() {
-        Error.apply(this, arguments);
-    };
-
-    function RequestAlreadyExistsError(message) {
-        this.message = message;
-        this.name = "RequestAlreadyExistsError";
-    }
-    RequestAlreadyExistsError.prototype = Object.create(Error.prototype);
-    RequestAlreadyExistsError.prototype.constructor = RequestAlreadyExistsError;
+    var InvalidQueueError = makeError('InvalidQueueError');
+    var RequestNotFoundError = makeError('RequestNotFoundError');
+    var RequestAlreadyExistsError = makeError('RequestAlreadyExistsError');
 
     // METHODS
     ////////////
@@ -145,7 +133,7 @@ module.exports = function(models) {
             if (queueObj.description) {
                 dbQueue.description = queueObj.description;
             }
-            
+
             return dbQueue.update({
                 name: dbQueue.name,
                 description: dbQueue.description
@@ -171,7 +159,7 @@ module.exports = function(models) {
             if (!courseOp) {
                 return Promise.resolve(this.queue);
             }
-            if (patchUtils.validatePatch(courseOp)) {
+            if (!patchUtils.validatePatch(courseOp)) {
                 throw new patchUtils.InvalidPatchError(
                     "Invalid format for updating courses");
             }
@@ -184,9 +172,9 @@ module.exports = function(models) {
             if (!roomOp) {
                 return findQueue(this.queue.id);
             }
-            if (patchUtils.validatePatch(roomOp)) {
+            if (!patchUtils.validatePatch(roomOp)) {
                 throw new patchUtils.InvalidPatchError(
-                    "Invalid format for updating courses");
+                    "Invalid format for updating rooms");
             }
             var self = this;
             return editQueueRooms(this.queue, roomOp.values, roomOp.op).then(function() {

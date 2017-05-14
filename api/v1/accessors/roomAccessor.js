@@ -1,29 +1,28 @@
 'use strict';
 
+const Promise = require('bluebird');
+
 module.exports = function(models) {
 
-    function createRoom(roomObj) {
-        return models.Room.create(roomObj);
-    }
-
     function createOrFindRoom(roomId) {
-        return models.Room.findOne({
+        return models.Room.findCreateFind({
             where: {
                 id: roomId
             }
-        }).then(function(dbRoom) {
-            if (!dbRoom) {
-                return createRoom({
-                    id: roomId
-                });
-            }
-            return dbRoom.save();
+        }).spread(function(dbRoom, created) {
+            return Promise.resolve(dbRoom);
+        });
+    }
+
+    function bulkCreateRooms(rooms) {
+        return Promise.map(rooms, function(room) {
+            return createOrFindRoom(room);
         });
     }
 
     return {
-        createRoom: createRoom,
-        createOrFindRoom: createOrFindRoom
+        createOrFindRoom: createOrFindRoom,
+        bulkCreateRooms: bulkCreateRooms
     };
 
 }

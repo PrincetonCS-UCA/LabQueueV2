@@ -1,7 +1,6 @@
 'use strict';
 
-const Validator = require('jsonschema').Validator;
-var v = new Validator();
+var validate = require('jsonschema').validate;
 
 const _ = require('lodash');
 
@@ -14,33 +13,73 @@ const associations = require('../../../enums/associations');
 const getArraysOfIds = require('../../../utils/getArraysOfIds');
 
 const ruleUtils = require('./utils/rules');
+const patchUtils = require('./utils/patchOps');
+
+const makeError = require('make-error');
 
 module.exports = function(models) {
 
-    // ERRORS
-    //////////
-    var OperationNotSupportedError = function() {
-        Error.apply(this, arguments);
+    var policySchema = {
+        type: 'object',
+        properties: {
+            name: {
+                type: 'string'
+            },
+            role: {
+                type: 'string',
+                required: true
+            },
+            rules: {
+                type: 'array',
+                required: true,
+                'items': {
+                    'type': 'object'
+                }
+            },
+            users: {
+                type: 'object'
+            }
+        }
     };
 
-    function createOrUpdatePolicy(queueId, name, role, rules) {
-        return findPolicy(queueId, role, rules).then(function(policy) {
+    // ERRORS
+    //////////
+    var OperationNotSupportedError = makeError('OperationNotSupportedError');
+    var PolicyNotFoundError = makeError('PolicyNotFoundError');
+    var InvalidPolicyError = makeError('InvalidPolicyError');
+
+    // users in the policyObj should be a patchObj
+    function createOrUpdatePolicy(queueId, policyObj) {
+
+        if (!validate(policyObj, policySchema).valid) {
+
+            return Promise.reject(new InvalidPolicyError());
+        }
+        console.log(policyObj.role);
+        return findPolicy(queueId, policyObj.role, policyObj.rules).then(function(policy) {
             if (policy) {
-                name = name || policy.name;
+                var name = policyObj.name || policy.name;
                 return policy.update({
                     name: name
                 });
             }
             else {
                 return models.Policy.create({
-                    name: name || "Unnamed Policy",
-                    role: role,
-                    rules: JSON.stringify(rules)
+                    name: policyObj.name || "Unnamed Policy",
+                    role: policyObj.role,
+                    rules: JSON.stringify(policyObj.rules)
                 })
             }
         }).then(function(dbPolicy) {
             return dbPolicy.setQueue(queueId).then(function() {
-                return Promise.resolve(dbPolicy);
+                if (!policyObj.users) {
+                    return Promise.resolve(dbPolicy);
+                }
+                if (!patchUtils.validatePatch(policyObj.users)) {
+                    throw new patchUtils.InvalidPatchError();
+                }
+                return updatePolicyUsers(dbPolicy, policyObj.users.values,
+                    policyObj.users.op);
             });
         });
     }
@@ -74,7 +113,12 @@ module.exports = function(models) {
 
     function createDefaultPolicy(queueId, role) {
         return getDefaultRulesForQueue(queueId).then(function(rule) {
-            return createOrUpdatePolicy(queueId, "default", role, [rule]);
+            var policy = {
+                name: "default",
+                role: role,
+                rules: [rule]
+            }
+            return createOrUpdatePolicy(queueId, policy);
         })
     }
 
@@ -164,7 +208,7 @@ module.exports = function(models) {
             for (var i = 0; i < policies.length; i++) {
                 var policy = policies[i];
                 var r = JSON.parse(policy.rules);
-                if (_.isEqual(r.sort(), rules.sort())) {
+                if (_.isEqual(r.sort(ruleUtils.sortRules), rules.sort(ruleUtils.sortRules))) {
                     return Promise.resolve(policy);
                 }
             }
@@ -187,17 +231,17 @@ module.exports = function(models) {
         });
     }
 
-    function editPolicy(queueId, name, role, rules, userIds, operation) {
+    function updatePolicyUsers(dbPolicy, userIds, operation) {
 
         function performOp(policy, userIds, op) {
             switch (op) {
                 case associations.add:
-                    return removeUsersFromOtherPolicies(queueId, userIds).then(function() {
+                    return removeUsersFromOtherPolicies(policy.queueId, userIds).then(function() {
                         return policy.addUsers(userIds);
                     });
                     break;
                 case associations.set:
-                    return removeUsersFromOtherPolicies(queueId, userIds).then(function() {
+                    return removeUsersFromOtherPolicies(policy.queueId, userIds).then(function() {
                         return policy.setUsers(userIds);
                     });
                     break;
@@ -220,18 +264,10 @@ module.exports = function(models) {
             });
         }
 
-        // TODO: use remove and add and set for the same thing here!
-        return findPolicy(queueId, role, rules).then(function(policy) {
-            return createOrUpdatePolicy(queueId, name, roles, rules).then(
-                function(dbPolicy) {
-                    return dbPolicy.setQueue(queueId).then(function() {
-                        return performOp(dbPolicy, userIds, operation);
-                    }).then(function() {
-                        return dbPolicy.save();
-                    });
-                });
+        return performOp(dbPolicy, userIds, operation).then(function() {
+            return dbPolicy.save();
+        });
 
-        })
     }
 
     return {
@@ -245,7 +281,9 @@ module.exports = function(models) {
         findPoliciesByUser: findPoliciesByUser,
         findAllPoliciesForQueue: findAllPoliciesForQueue,
         findPoliciesThatFitRequest: findPoliciesThatFitRequest,
-        editPolicy: editPolicy
+
+        OperationNotSupportedError: OperationNotSupportedError,
+        PolicyNotFoundError: PolicyNotFoundError
     };
 
 }

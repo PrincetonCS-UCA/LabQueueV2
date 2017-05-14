@@ -52,8 +52,58 @@ function fitsRulesList(request, rules) {
     return false;
 }
 
+function sortRules(rule1, rule2) {
+
+    if (rule1.courses.length > rule2.courses.length) {
+        return 1;
+    }
+    if (rule1.courses.length < rule2.courses.length) {
+        return -1;
+    }
+
+    var sortedCourses1 = rule1.courses.sort();
+    var sortedCourses2 = rule2.courses.sort();
+
+    for (var i = 0; i < rule1.courses.length; i++) {
+        if (sortedCourses1[i] > sortedCourses2[i]) {
+            return 1;
+        }
+        else if (sortedCourses1[i] < sortedCourses2[i]) {
+            return -1;
+        }
+    }
+
+    if (rule1.rooms.length > rule2.rooms.length) {
+        return 1;
+    }
+    if (rule1.rooms.length < rule2.rooms.length) {
+        return -1;
+    }
+
+    var sortedRooms1 = rule1.rooms.sort();
+    var sortedRooms2 = rule2.rooms.sort();
+
+    for (var i = 0; i < rule1.rooms.length; i++) {
+        if (sortedRooms1[i] > sortedRooms2[i]) {
+            return 1;
+        }
+        else if (sortedRooms1[i] < sortedRooms2[i]) {
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+function isEqual(rule1, rule2) {
+    return sortRules(rule1, rule2) === 0;
+}
+
 module.exports = {
     ruleSchema: ruleSchema,
     fitsRule: fitsRule,
-    fitsRulesList: fitsRulesList
+    fitsRulesList: fitsRulesList,
+
+    sortRules: sortRules,
+    isEqual: isEqual
 };

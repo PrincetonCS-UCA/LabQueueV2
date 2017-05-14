@@ -66,19 +66,17 @@ module.exports = function(app, models) {
             rules: req.body.rules
         }
 
-        var userOps = null;
         if (req.body.users) {
-
+            p.users = req.body.users;
         }
 
-        policyAccessor.createOrUpdatePolicy(req.queue.id, p.name, p.role, p.rules).then(
+        policyAccessor.createOrUpdatePolicy(req.queue.id, p).then(
             function(policy) {
                 // add users to it if there are any in the request body.
+                res.json(policy);
             }).catch(function(err) {
             next(err);
         });
-
-        next(new errors.NotImplemented());
     }
 
     return {

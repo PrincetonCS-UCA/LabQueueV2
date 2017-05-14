@@ -1,5 +1,7 @@
 'use strict';
 
+const Promise = require('bluebird');
+
 module.exports = function(models) {
 
     function createOrFindCourse(courseId) {
@@ -18,9 +20,25 @@ module.exports = function(models) {
         });
     }
 
+    function updateCourse(courseId, courseObj) {
+        return createOrFindCourse(courseId).then(function(course) {
+            return course.update(courseObj);
+        });
+    }
+
+    function deleteCourse(courseId) {
+        return models.Course.destroy({
+            where: {
+                id: courseId
+            }
+        })
+    }
+
     return {
         createOrFindCourse: createOrFindCourse,
-        bulkCreateCourses: bulkCreateCourses
+        bulkCreateCourses: bulkCreateCourses,
+        updateCourse: updateCourse,
+        deleteCourse: deleteCourse
     };
 
 }

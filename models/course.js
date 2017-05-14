@@ -14,7 +14,10 @@ module.exports = function(sequelize, DataTypes) {
     id: {
       type: DataTypes.STRING,
       unique: true,
-      primaryKey: true
+      primaryKey: true,
+      validate: {
+        isAlphanumeric: true
+      }
     }
   }, {
     classMethods: {

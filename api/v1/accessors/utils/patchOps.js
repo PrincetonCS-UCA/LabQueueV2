@@ -2,12 +2,11 @@ const _ = require('lodash');
 
 const Validator = require('jsonschema').Validator;
 const associations = require('../../../../enums/associations');
+const makeError = require('make-error');
 
 var v = new Validator();
 
-var InvalidPatchError = function() {
-    Error.apply(this, arguments);
-};
+var InvalidPatchError = makeError('InvalidPatchError');
 
 var patchSchema = {
     type: 'object',
@@ -26,10 +25,13 @@ var patchSchema = {
 }
 
 function validatePatch(patch) {
+    console.log(patch);
     if (!v.validate(patch, patchSchema).valid) {
+        console.log("Invalid");
         return false;
     }
-    if (!associations[patchSchema.op]) {
+    if (!associations[patch.op]) {
+        console.log("No association");
         return false;
     }
     return true;
