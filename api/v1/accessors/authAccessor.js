@@ -1,6 +1,9 @@
 const crypto = require('crypto');
+const ruleUtils = require('./utils/rules');
 
 module.exports = function(models) {
+
+    const policyAccessor = require('./policyAccessor')(models);
 
     function getWSSEKey(username, service) {
         return models.WSSEKey.findOne({
@@ -47,9 +50,51 @@ module.exports = function(models) {
         });
     }
 
+    function canHelpRequest(requestObj, casId) {
+        return policyAccessor.findPoliciesByUser(requestObj.queueId, casId, requestObj).then(
+            function(policies) {
+                for (var i = 0; i < policies.length; i++) {
+                    var policy = policies[i];
+                    var rules = JSON.parse(policy.rules);
+                    if (ruleUtils.fitsRulesList(requestObj, rules)) {
+                        return Promise.resolve(true);
+                    }
+                }
+                return Promise.resolve(false);
+            });
+    }
+
+    function canCancelRequest(requestObj, casId) {
+        if (requestObj.authorId === casId) {
+            return Promise.resolve(true);
+        }
+        else {
+            return canHelpRequest(requestObj, casId);
+        }
+    }
+
+    function isRole(queueId, casId, role) {
+        policyAccessor.findPoliciesByUser(queueId, casId).then(
+            function(policies) {
+                for (var i = 0; i < policies.length; i++) {
+                    var policy = policies[i];
+                    if (policy.role === role) {
+                        return Promise.resolve(true);
+                    }
+                }
+                return Promise.resolve(false);
+
+            });
+
+    }
+
     return {
         getWSSEKey: getWSSEKey,
         generateWSSEKey: generateWSSEKey,
-        saveNonce: saveNonce
+        saveNonce: saveNonce,
+
+        canHelpRequest: canHelpRequest,
+        canCancelRequest: canCancelRequest,
+        isRole: isRole
     };
 }

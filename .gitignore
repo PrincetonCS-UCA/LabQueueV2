@@ -3,3 +3,4 @@ public/js/*
 public/css/*
 db.development.sqlite
 db.test.sqlite
+config/config.json

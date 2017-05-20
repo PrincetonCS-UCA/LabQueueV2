@@ -38,8 +38,12 @@ function fitsRule(request, rule) {
     var ruleCourses = convertToArray(rule.courses);
     var ruleRooms = convertToArray(rule.rooms);
 
-    return _.findIndex(ruleCourses, requestCourse) !== -1 &&
-        _.findIndex(ruleRooms, requestRoom) !== -1;
+    return _.findIndex(ruleCourses, function(o) {
+            return o.toString() === requestCourse.toString();
+        }) !== -1 &&
+        _.findIndex(ruleRooms, function(o) {
+            return o.toString() === requestRoom.toString();
+        }) !== -1;
 
 }
 

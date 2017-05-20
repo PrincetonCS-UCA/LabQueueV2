@@ -55,7 +55,6 @@ module.exports = function(models) {
 
             return Promise.reject(new InvalidPolicyError());
         }
-        console.log(policyObj.role);
         return findPolicy(queueId, policyObj.role, policyObj.rules).then(function(policy) {
             if (policy) {
                 var name = policyObj.name || policy.name;

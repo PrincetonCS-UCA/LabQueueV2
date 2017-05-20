@@ -1,6 +1,8 @@
 var passport = require('passport');
 var models = require('../models');
 
+const tigerbookAccessor = require('../api/v1/accessors/tigerbookAccessor')(models);
+
 module.exports = function(app) {
 
     app.use(passport.initialize());
@@ -24,13 +26,26 @@ module.exports = function(app) {
                 }
                 else {
 
-                    models.User.create({
-                        name: "Test User",
-                        casId: login,
-                        universityId: "dmliao"
-                    }).then(function(user) {
-                        done(null, user);
-                    });
+                    tigerbookAccessor.getStudentInfo(login).then(function(studentInfo) {
+                        console.log(studentInfo);
+                        models.User.create({
+                            name: tigerbookAccessor.getName(studentInfo),
+                            casId: login,
+                            universityId: login
+                        }).then(function(user) {
+                            done(null, user);
+                        });
+                    }).catch(function(err) {
+                        // can't access tigerbook
+                        models.User.create({
+                            name: login,
+                            casId: login,
+                            universityId: login
+                        }).then(function(user) {
+                            done(null, user);
+                        });
+                    })
+
                 }
             });
     }));

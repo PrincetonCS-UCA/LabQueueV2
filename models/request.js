@@ -37,7 +37,36 @@ module.exports = function(sequelize, DataTypes) {
           onDelete: "NO ACTION"
         });
       }
-    }
+    },
+    indexes: [{
+      name: 'request_queue_index',
+      method: 'BTREE',
+      fields: ['queueId', {
+        attribute: 'createdAt',
+        order: 'DESC'
+      }]
+    }, {
+      name: 'request_course_index',
+      method: 'BTREE',
+      fields: ['courseId', {
+        attribute: 'createdAt',
+        order: 'DESC'
+      }]
+    }, {
+      name: 'request_author_index',
+      method: 'BTREE',
+      fields: ['authorId', {
+        attribute: 'createdAt',
+        order: 'DESC'
+      }]
+    }, {
+      name: 'request_helper_index',
+      method: 'BTREE',
+      fields: ['helperId', {
+        attribute: 'createdAt',
+        order: 'DESC'
+      }]
+    }]
   });
 
   return Request;

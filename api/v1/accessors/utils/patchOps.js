@@ -25,13 +25,10 @@ var patchSchema = {
 }
 
 function validatePatch(patch) {
-    console.log(patch);
     if (!v.validate(patch, patchSchema).valid) {
-        console.log("Invalid");
         return false;
     }
     if (!associations[patch.op]) {
-        console.log("No association");
         return false;
     }
     return true;
