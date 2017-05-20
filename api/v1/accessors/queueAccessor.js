@@ -276,8 +276,14 @@ module.exports = function(models) {
         }).then(function() {
             return this.request.setAuthor(authorId);
         }).then(function() {
+            if (!courseId) {
+                return Promise.resolve();
+            }
             return this.request.setCourse(courseId);
         }).then(function() {
+            if (!roomId) {
+                return Promise.resolve();
+            }
             return this.request.setRoom(roomId);
         }).then(function() {
             return this.request.save();
@@ -338,17 +344,25 @@ module.exports = function(models) {
     }
 
     function changeRequestStatus(queueId, requestId, status, editorUserId) {
-        return findRequest(queueId, requestId).then(function(request) {
+        return findRequest(queueId, requestId).bind({}).then(function(request) {
             if (!request) {
                 throw new RequestNotFoundError();
             }
 
-            return request.setHelper(editorUserId).then(function() {
+            return request.update({
+                status: status
+            });
 
-                return request.update({
-                    status: status
-                });
-            })
+        }).then(function(request) {
+            this.request = request;
+            if (editorUserId) {
+                return request.setHelper(editorUserId);
+            }
+            else {
+                return Promise.resolve(request);
+            }
+        }).then(function() {
+            return this.request.reload();
         })
     }
 
@@ -368,6 +382,7 @@ module.exports = function(models) {
         editQueueRooms: editQueueRooms,
 
         findRequest: findRequest,
+        findRequestHistory: findRequestHistory,
         createRequest: createRequest,
         changeRequestStatus: changeRequestStatus
     };
