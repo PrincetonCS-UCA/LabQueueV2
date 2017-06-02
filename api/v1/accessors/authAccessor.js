@@ -74,7 +74,7 @@ module.exports = function(models) {
     }
 
     function isRole(queueId, casId, role) {
-        policyAccessor.findPoliciesByUser(queueId, casId).then(
+        return policyAccessor.findPoliciesByUser(queueId, casId).then(
             function(policies) {
                 for (var i = 0; i < policies.length; i++) {
                     var policy = policies[i];

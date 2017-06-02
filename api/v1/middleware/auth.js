@@ -46,8 +46,8 @@ module.exports = function(app, models) {
                     req.user = user;
                     next();
                 }).catch(function(error) {
-                    throw new errors.NotAuthenticated(
-                        'Improper WSSE credentials');
+                    next(new errors.NotAuthenticated(
+                        'Improper WSSE credentials'));
                 })
             }
         }

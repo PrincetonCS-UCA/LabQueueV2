@@ -87,6 +87,14 @@ describe('Loading Express', function() {
                 done();
             });
 
+        });
+
+        beforeEach(function(done) {
+            db.Request.destroy({
+                truncate: true
+            }).then(function() {
+                done();
+            })
         })
         describe('create requests', function() {
             it('should create a request in the queue', function(done) {
@@ -108,6 +116,42 @@ describe('Loading Express', function() {
             });
 
             it('should create another request in the queue', function(done) {
+                var req = requestUtils[0].createRequest(server,
+                    '/api/v1/queue/test-queue/requests',
+                    'POST', {});
+
+                req.end(function(error,
+                    response) {
+
+                    var res = response.body;
+                    should.not.exist(
+                        error);
+                    console.log(res);
+                    assert.equal(res.authorId, users[0].username);
+                    assert.equal(res.status,
+                        requestStatuses.in_queue);
+
+                    req = requestUtils[1].createRequest(server,
+                        '/api/v1/queue/test-queue/requests',
+                        'POST', {});
+
+                    req.end(function(error,
+                        response) {
+                        var res = response.body;
+                        should.not.exist(
+                            error);
+                        console.log(res);
+                        assert.equal(res.authorId, users[1].username);
+                        assert.equal(res.status,
+                            requestStatuses.in_queue);
+                        done();
+                    });
+                });
+
+            });
+
+            it('should allow a TA to claim the request', function(
+                done) {
                 var req = requestUtils[1].createRequest(server,
                     '/api/v1/queue/test-queue/requests',
                     'POST', {});
@@ -117,11 +161,25 @@ describe('Loading Express', function() {
                     var res = response.body;
                     should.not.exist(
                         error);
-                    console.log(res);
                     assert.equal(res.authorId, users[1].username);
                     assert.equal(res.status,
                         requestStatuses.in_queue);
-                    done();
+
+                    // 0 is a TA
+                    req = requestUtils[0].createRequest(server,
+                        '/api/v1/queue/test-queue/requests/' + res.id + '/complete',
+                        'POST', {});
+
+                    req.end(function(error, response) {
+                        var res = response.body;
+                        should.not.exist(
+                            error);
+                        console.log(res);
+                        assert.equal(res.authorId, users[1].username);
+                        assert.equal(res.status,
+                            requestStatuses.was_helped);
+                        done();
+                    })
                 });
             });
 
@@ -136,11 +194,19 @@ describe('Loading Express', function() {
                     var res = response.body;
                     should.not.exist(
                         error);
-                    console.log(res);
                     assert.equal(res.authorId, users[1].username);
                     assert.equal(res.status,
                         requestStatuses.in_queue);
-                    done();
+                    req = requestUtils[1].createRequest(server,
+                        '/api/v1/queue/test-queue/requests/' + res.id + '/complete',
+                        'POST', {});
+
+                    req.end(function(error, response) {
+                        should(response.statusCode)
+                            .be.exactly(
+                                403);
+                        done();
+                    })
                 });
             });
         });

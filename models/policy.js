@@ -26,6 +26,14 @@ module.exports = function(sequelize, DataTypes) {
           foreignKey: 'policyId'
         });
       }
+    },
+    instanceMethods: {
+      toJSON: function() {
+        var values = this.get();
+        var rules = JSON.parse(values.rules);
+        values.rules = rules;
+        return values;
+      }
     }
   });
 

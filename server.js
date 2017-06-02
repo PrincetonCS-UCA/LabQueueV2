@@ -25,6 +25,8 @@ const db = require('./models');
 
 var auth = require('./api/v1/middleware/auth')(app, db);
 
+var appRoutes = require('./app/routes/routes');
+
 app.set('port', process.env.PORT || 3000);
 app.set('models', db);
 
@@ -62,16 +64,12 @@ let apiOptions = {
 //Load the api versions
 require('./api/v1')(apiOptions);
 
+appRoutes(app, db);
+
 var socketOptions = {
     app: http,
     models: db
 };
-
-app.get('*', auth.casBounce(), function(req, res) {
-    res.render('index', {
-        user: JSON.stringify(req.user)
-    });
-});
 
 //Load the socket file
 require('./sockets')(socketOptions);

@@ -57,7 +57,20 @@ module.exports = function(app, models) {
     function isRole(role) {
         return function(req, res, next) {
             // uses req.queue and req.user
+            if (req.user.id === req.queue.owner) {
+                return next(); // if owner, we automatically assume we have permission
+            }
 
+            authAccessor.isRole(req.queue.id, req.user.id, role).then(function(role) {
+                if (role) {
+                    return next();
+                }
+                return next(new errors.Forbidden(
+                    "User does not have the authorization to perform this operation"
+                ));
+            }).catch(function(error) {
+                next(error);
+            });
         }
     }
     return {
@@ -68,8 +81,10 @@ module.exports = function(app, models) {
             return isRole(policyTypes.admin);
         },
         isSiteAdmin: function() {
-            return true; // TODO: Implement!
-        }
+            return function(req, res, next) {
+                next(); // TODO: implement!
+            }
+        },
         canHelpRequest: canHelpRequest,
         canEditRequest: isRequestAuthor,
         canCancelRequest: canCancelRequest

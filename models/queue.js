@@ -35,7 +35,6 @@ module.exports = function(sequelize, DataTypes) {
     instanceMethods: {
       toJSON: function() {
         var values = this.get();
-        // Do your magic here 
 
         if (values.courses) {
           values.courses = getArraysOfIds(values.courses);

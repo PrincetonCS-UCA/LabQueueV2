@@ -5,6 +5,7 @@ var policyTypes = require('../../enums/policyTypes');
 module.exports = function(app, models, prefix) {
 
     var auth = require('./middleware/auth')(app, models);
+    var permissions = require('./middleware/permissions')(app, models);
 
     var Controller = require('./controllers/queueController')(app, models);
 
@@ -26,19 +27,19 @@ module.exports = function(app, models, prefix) {
 
     app.route(prefix + 'queue/:queue/requests/:request')
         .get(auth.isAuthenticated(), Controller.getSingleRequest)
-        .put(auth.isAuthenticated(), Controller.editSingleRequest);
+        .put(auth.isAuthenticated(), permissions.canEditRequest(), Controller.editSingleRequest);
 
     app.route(prefix + 'queue/:queue/requests')
         .post(auth.isAuthenticated(), Controller.createRequest);
 
     // test routes
-    app.get(prefix + 'queue/create', auth.isAuthenticated(), Controller.createQueueTest);
+    app.get(prefix + 'queue/create', auth.casBounce(), Controller.createQueueTest);
 
     app.route(prefix + 'queue/:queue/create')
         .get(auth.isAuthenticated(), Controller.createRequest);
 
     app.route(prefix + 'queue/:queue/requests/:request/cancel')
-        .get(auth.isAuthenticated(), Controller.cancelRequest);
+        .post(auth.isAuthenticated(), permissions.canCancelRequest(), Controller.cancelRequest);
     app.route(prefix + 'queue/:queue/requests/:request/complete')
-        .get(auth.isAuthenticated(), Controller.completeRequest);
+        .post(auth.isAuthenticated(), permissions.canHelpRequest(), Controller.completeRequest);
 }

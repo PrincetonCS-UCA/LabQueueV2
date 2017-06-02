@@ -8,7 +8,7 @@ var CSS_DIR = path.resolve(__dirname, 'app/scss');
 
 var config = {
   entry: {
-    'bundle': [APP_DIR + '/index.jsx', CSS_DIR + '/main.scss']
+    'bundle': [APP_DIR + '/index.js', CSS_DIR + '/main.scss']
   },
   output: {
     path: BUILD_DIR,

@@ -38,12 +38,28 @@ function fitsRule(request, rule) {
     var ruleCourses = convertToArray(rule.courses);
     var ruleRooms = convertToArray(rule.rooms);
 
-    return _.findIndex(ruleCourses, function(o) {
+    var fitsCourse = false;
+    var fitsRoom = false;
+
+    if (requestCourse) {
+        fitsCourse = _.findIndex(ruleCourses, function(o) {
             return o.toString() === requestCourse.toString();
-        }) !== -1 &&
-        _.findIndex(ruleRooms, function(o) {
+        }) !== -1;
+    }
+    else {
+        fitsCourse = true; // if the request has no course, it's free game
+    }
+
+    if (requestRoom) {
+        fitsRoom = _.findIndex(ruleRooms, function(o) {
             return o.toString() === requestRoom.toString();
         }) !== -1;
+    }
+    else {
+        fitsRoom = true;
+    }
+
+    return fitsCourse && fitsRoom;
 
 }
 
