@@ -295,7 +295,12 @@ module.exports = function(models) {
             where: {
                 queueId: queueId,
                 id: requestId
-            }
+            },
+            include: [{
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name']
+            }]
         });
     }
 
@@ -307,7 +312,12 @@ module.exports = function(models) {
                 queueId: queueId,
                 authorId: userId,
                 status: requestStatuses.in_queue
-            }
+            },
+            include: [{
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name']
+            }]
         });
     }
 
@@ -322,7 +332,12 @@ module.exports = function(models) {
                 roomId: {
                     $in: rule.rooms
                 }
-            }
+            },
+            include: [{
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name']
+            }]
         })
     }
 
@@ -331,7 +346,12 @@ module.exports = function(models) {
             where: {
                 queueId: queueId,
                 status: requestStatuses.in_queue
-            }
+            },
+            include: [{
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name']
+            }]
         });
     }
 
@@ -339,7 +359,12 @@ module.exports = function(models) {
         return models.Request.findAll({
             where: {
                 queueId: queueId
-            }
+            },
+            include: [{
+                model: models.User,
+                as: 'author',
+                attributes: ['id', 'name']
+            }]
         });
     }
 

@@ -1,3 +1,5 @@
+These are general notes for an anticipated frontend - and are not in any organized form.
+
 * Bulk add / remove TAs from a queue
 * Easily complete or cancel requests
 * Analytics

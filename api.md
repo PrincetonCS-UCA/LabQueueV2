@@ -128,7 +128,7 @@ Requests can only be edited by authors, TAs of a queue, or the queue admin(s)
 
 */queue/:queue/requests/:request* - edit contents of a request
 */queue/:queue/requests/:request/cancel* - cancels a request
-*/queue/:queue/requests/:request/claim* - sets request to inProgress, and sets current user as the helper
+*/queue/:queue/requests/:request/claim* - sets request to inProgress, and sets current user as the helper. Completely unimplemented at the moment.
 */queue/:queue/requests/:request/complete* - completes a request
 
 */queue/:queue/policies/:policy* - edits details of a policy, including roles and users
@@ -150,14 +150,6 @@ Page Endpoints:
 
 We store actual WSSE password in the server, not the encoded result!
 
-## Get photos
-
-Example: route /photo/dmliao
-    - authentication
-    - WSSE-GET tigerbook.../dmliao (secret WSSE key for Tigerbook, custom to the app)
-    - print(content-type=png)
-    - print(image-data)
-
 ## Other Logic
 
 ### Check if a User has Permission for a specific Queue:
@@ -171,7 +163,9 @@ Example: route /photo/dmliao
 
 ### Making sure that each User is in only one Policy per Queue
 
-Is this necessary?
+Is this necessary? 
+
+The current implementation is a bit redundant; it will ensure there is only one policy per user per queue, but all the code will check all of the policies belonging to a user (looping through an array of policies), which will handle any cases where a user has multiple policies.
     
 https://github.com/sequelize/sequelize/issues/4880
 

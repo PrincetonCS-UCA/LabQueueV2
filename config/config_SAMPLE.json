@@ -19,5 +19,6 @@
   "tigerbook": {
     "username": "REPLACE",
     "password": "REPLACE"
-  }
+  },
+  "apiPrefix": "/api/v1/"
 }

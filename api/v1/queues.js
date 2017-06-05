@@ -32,14 +32,15 @@ module.exports = function(app, models, prefix) {
     app.route(prefix + 'queue/:queue/requests')
         .post(auth.isAuthenticated(), Controller.createRequest);
 
-    // test routes
-    app.get(prefix + 'queue/create', auth.casBounce(), Controller.createQueueTest);
-
-    app.route(prefix + 'queue/:queue/create')
-        .get(auth.isAuthenticated(), Controller.createRequest);
-
     app.route(prefix + 'queue/:queue/requests/:request/cancel')
         .post(auth.isAuthenticated(), permissions.canCancelRequest(), Controller.cancelRequest);
     app.route(prefix + 'queue/:queue/requests/:request/complete')
         .post(auth.isAuthenticated(), permissions.canHelpRequest(), Controller.completeRequest);
+
+    // test routes
+    app.get(prefix + 'queue/create', auth.casBounce(), Controller.createQueueTest);
+
+    app.route(prefix + 'queue/:queue/create')
+        .get(auth.casBounce(), Controller.createRequest);
+
 }
